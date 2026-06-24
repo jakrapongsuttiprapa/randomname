@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tr. Oat's Lucky Draw</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #ff4757; --primary-dark: #c0392b;
+            --secondary: #1e90ff; --secondary-dark: #0984e3;
+            --accent: #2ed573; --accent-dark: #27ae60;
+            --warning: #ffa502; --warning-dark: #e67e22;
+            --purple: #9b59b6; --purple-dark: #8e44ad;
+            --dark: #2d3436; --light: #f1f2f6; --gray: #747d8c;
+        }
+        body {
+            font-family: 'Kanit', sans-serif; margin: 0; padding: 20px;
+            background: radial-gradient(circle at center, #2b1055 0%, #050b14 100%);
+            min-height: 100vh; display: flex; justify-content: center; align-items: center; 
+            color: var(--light); overflow-x: hidden;
+        }
+        .fullscreen-btn {
+            position: fixed; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.1); 
+            border: 2px solid rgba(255, 255, 255, 0.3); color: white; font-size: 1.5rem; 
+            padding: 10px 15px; border-radius: 12px; cursor: pointer; z-index: 1000; transition: 0.3s; backdrop-filter: blur(5px);
+        }
+        .fullscreen-btn:hover { background: rgba(255, 255, 255, 0.3); transform: scale(1.1); }
+        .container {
+            background: rgba(20, 20, 30, 0.7); padding: 30px; border-radius: 24px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), inset 0 0 0 2px rgba(255,255,255,0.1);
+            max-width: 1000px; width: 100%; text-align: center; backdrop-filter: blur(15px); animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        h1 { 
+            font-size: 3rem; margin-bottom: 20px; margin-top: 0; font-weight: 900; letter-spacing: 2px;
+            background: linear-gradient(to right, #ff4757, #ffa502); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 5px 15px rgba(255, 71, 87, 0.4);
+        }
+        .layout { display: flex; flex-wrap: wrap; gap: 25px; }
+        .input-section { flex: 1; min-width: 320px; display: flex; flex-direction: column; gap: 15px; }
+        .result-section { flex: 1.2; min-width: 350px; }
+        .glass-panel { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 16px; border: 2px solid rgba(255, 255, 255, 0.1); text-align: left; }
+        select, textarea, input[type="number"] {
+            width: 100%; padding: 12px; border-radius: 12px; font-family: 'Kanit', sans-serif; font-size: 1.1rem; font-weight: 600;
+            background: rgba(255, 255, 255, 0.9); color: var(--dark); border: 3px solid transparent; outline: none; transition: 0.3s; box-sizing: border-box;
+        }
+        select:focus, textarea:focus, input[type="number"]:focus { border-color: var(--warning); box-shadow: 0 0 15px rgba(255, 165, 2, 0.5); }
+        textarea { height: 130px; resize: none; font-weight: 400; }
+        .toggle-section { background: rgba(255, 165, 2, 0.15); border: 2px dashed var(--warning); padding: 12px; border-radius: 12px; font-weight: bold; color: #ffd32a; display: flex; align-items: center; cursor: pointer; }
+        .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        button.btn-game { padding: 12px 10px; border: none; border-radius: 12px; font-family: 'Kanit', sans-serif; font-size: 1.1rem; font-weight: 800; color: white; cursor: pointer; text-transform: uppercase; position: relative; top: 0; transition: all 0.1s; }
+        button.btn-game:active { top: 6px; } 
+        .btn-single { background-color: var(--primary); box-shadow: 0 6px 0 var(--primary-dark); }
+        .btn-single:active { box-shadow: 0 0px 0 var(--primary-dark); }
+        .btn-pair { background-color: var(--secondary); box-shadow: 0 6px 0 var(--secondary-dark); }
+        .btn-pair:active { box-shadow: 0 0px 0 var(--secondary-dark); }
+        .btn-reset { background-color: var(--gray); box-shadow: 0 6px 0 #57606f; }
+        .btn-reset:active { box-shadow: 0 0px 0 #57606f; }
+        .btn-group { background-color: var(--purple); box-shadow: 0 6px 0 var(--purple-dark); flex: 1; }
+        .btn-group:active { box-shadow: 0 0px 0 var(--purple-dark); }
+        .btn-score { background-color: var(--accent); box-shadow: 0 6px 0 var(--accent-dark); margin-top: 20px; font-size: 1.3rem; padding: 12px 25px; animation: bounceIn 0.5s; width: 80%; }
+        .btn-score:active { box-shadow: 0 0px 0 var(--accent-dark); }
+        .group-setting { display: flex; align-items: center; gap: 10px; }
+        .group-setting input { width: 70px; text-align: center; padding: 10px; }
+        .result-box {
+            background: linear-gradient(180deg, rgba(30, 39, 46, 0.9) 0%, rgba(11, 23, 42, 0.9) 100%);
+            border: 4px solid var(--secondary); border-radius: 20px; min-height: 450px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: 0 0 30px rgba(30, 144, 255, 0.3), inset 0 0 20px rgba(0,0,0,0.8); position: relative; overflow: hidden; padding: 30px;
+        }
+        .avatar { width: 140px; height: 140px; background: white; border-radius: 50%; padding: 5px; margin-bottom: 15px; border: 5px solid var(--warning); box-shadow: 0 0 25px var(--warning); }
+        .winner-name { font-size: 4rem; font-weight: 900; color: #fff; text-shadow: 0 0 10px var(--secondary), 0 0 20px var(--secondary), 0 0 40px var(--primary); margin: 10px 0; text-align: center; line-height: 1.1; letter-spacing: 1px; }
+        .challenge-box { background: rgba(255, 255, 255, 0.95); color: var(--dark); padding: 15px 20px; border-radius: 12px; border-left: 8px solid var(--warning); margin-top: 15px; font-size: 1.4rem; font-weight: 600; max-width: 90%; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .result-list { font-size: 1.3rem; text-align: left; width: 100%; max-height: 400px; overflow-y: auto; }
+        .group-item { background: rgba(255, 255, 255, 0.1); margin: 10px 0; padding: 12px; border-radius: 10px; border-left: 6px solid var(--warning); }
+        .animate-spin { animation: screenShake 0.1s infinite alternate; }
+        @keyframes screenShake { from { transform: translate(-2px, 1px); filter: brightness(1.2); } to { transform: translate(2px, -1px); filter: brightness(0.8); } }
+        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); } }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 10px; }
+    </style>
+</head>
+<body onload="loadAppData()">
+
+<button class="fullscreen-btn" onclick="toggleFullScreen()" title="เต็มหน้าจอ">🔲</button>
+<audio id="spinSound" src="https://actions.google.com/sounds/v1/science_fiction/space_computer_processing.ogg" preload="auto" crossorigin="anonymous"></audio>
+<audio id="tadaSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_success_fanfare.ogg" preload="auto" crossorigin="anonymous"></audio>
+
+<div class="container">
+    <h1>🎮 𝐋𝐔𝐂𝐊𝐘 𝐃𝐑𝐀𝐖 𝐀𝐑𝐂𝐀𝐃𝐄 🎯</h1>
+    <div class="layout">
+        <div class="input-section">
+            <div class="glass-panel">
+                <div style="font-weight: 800; margin-bottom: 8px; color: #ffd32a; font-size: 1.2rem;">📚 เลือกห้องเรียน:</div>
+                <select id="savedRooms" onchange="onRoomChange()">
+                    <option value="">-- กำลังเชื่อมต่อฐานข้อมูล... ⏳ --</option>
+                </select>
+            </div>
+            <textarea id="nameList" placeholder="รายชื่อนักเรียนจะแสดงที่นี่ (สามารถลบชื่อคนที่ขาดเรียนออกชั่วคราวได้)"></textarea>
+            <label class="toggle-section">
+                <input type="checkbox" id="challengeMode" checked style="transform: scale(1.5); margin-right: 15px;"> 
+                🎯 เปิดโหมดสุ่มคำถาม / ภารกิจสุดโหด!
+            </label>
+            <div class="controls">
+                <button class="btn-game btn-single" onclick="startRandom('single')">👤 สุ่ม 1 คน</button>
+                <button class="btn-game btn-pair" onclick="startRandom('pair')">👥 จับคู่</button>
+                <button class="btn-game btn-reset" onclick="resetRoom()">🔄 รีเซ็ตชื่อ</button>
+            </div>
+            <div class="group-setting">
+                <button class="btn-game btn-group" onclick="startRandom('group')">📦 จัดกลุ่ม</button>
+                <span style="font-weight: bold; color: white;">กลุ่มละ:</span>
+                <input type="number" id="groupSize" value="3" min="2" max="10">
+                <span style="font-weight: bold; color: white;">คน</span>
+            </div>
+        </div>
+        <div class="result-section">
+            <div id="resultDisplay" class="result-box">
+                <span style="color: #747d8c; font-size: 1.8rem; font-weight: 600;">รอโหลดระบบ... ⏳</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // ⚠️ นำ Web App URL ของ Google Apps Script มาใส่ตรงนี้ ⚠️
+    // ==========================================
+    const GAS_API_URL = "YOUR_WEB_APP_URL_HERE"; 
+
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => alert(`Error: ${err.message}`));
+        } else if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+
+    let allClassrooms = {};
+    let allChallenges = {}; 
+
+    // ดึงข้อมูลผ่าน Fetch API (แทนการใช้ google.script.run)
+    async function loadAppData() {
+        if (GAS_API_URL === "https://script.google.com/macros/s/AKfycbytDzo2bplb4pGbxvIdQ_IT-VuoqDwIuwnt3iWEzjR1yaqTRfQyS3pfRH8ur_ov0sGHiA/exec" || !GAS_API_URL) {
+            document.getElementById('resultDisplay').innerHTML = '<span style="color:#ff4757; font-size:1.5rem;">⚠️ กรุณาใส่ GAS Web App URL ในโค้ดก่อนครับ</span>';
+            return;
+        }
+
+        try {
+            const response = await fetch(GAS_API_URL + "?action=getAppData");
+            const data = await response.json();
+            
+            if (data.Error) {
+                document.getElementById('resultDisplay').innerHTML = '<span style="color:#ff4757;">⚠️ ไม่พบข้อมูล กรุณาตรวจสอบชีต</span>';
+                return;
+            }
+            
+            allClassrooms = data.classrooms;
+            allChallenges = data.challenges; 
+            updateRoomDropdown();
+            document.getElementById('resultDisplay').innerHTML = '<span style="color: #2ed573; font-size: 2rem;">✅ READY!<br>เลือกระดับชั้นเพื่อเริ่มเกมได้เลย</span>';
+        } catch (error) {
+            document.getElementById('resultDisplay').innerHTML = '<span style="color:#ff4757; font-size: 1.5rem;">⚠️ เชื่อมต่อ API ไม่สำเร็จ</span>';
+            console.error("Error fetching data:", error);
+        }
+    }
+
+    function updateRoomDropdown() {
+        const dropdown = document.getElementById('savedRooms');
+        dropdown.innerHTML = '<option value="">-- คลิกเพื่อเลือกห้องเรียน --</option>';
+        for(let room in allClassrooms) {
+            let option = document.createElement('option');
+            option.value = room; option.text = room;
+            dropdown.appendChild(option);
+        }
+    }
+
+    function onRoomChange() {
+        const selectedRoom = document.getElementById('savedRooms').value;
+        const textarea = document.getElementById('nameList');
+        if(selectedRoom && allClassrooms[selectedRoom]) {
+            textarea.value = allClassrooms[selectedRoom].join('\n');
+            document.getElementById('resultDisplay').innerHTML = '<span style="color: #1e90ff; font-size: 2.5rem; font-weight: 800;">PRESS START 🎯</span>';
+        } else { textarea.value = ''; }
+    }
+
+    function resetRoom() {
+        const selectedRoom = document.getElementById('savedRooms').value;
+        if(selectedRoom && allClassrooms[selectedRoom]) {
+            document.getElementById('nameList').value = allClassrooms[selectedRoom].join('\n');
+            document.getElementById('resultDisplay').innerHTML = '<span style="color: #ffa502;">🔄 รีเซ็ตรายชื่อครบแล้ว!</span>';
+        } else { alert('กรุณาเลือกห้องเรียนก่อนครับ!'); }
+    }
+
+    function getNames() { return document.getElementById('nameList').value.split('\n').map(name => name.trim()).filter(name => name !== ''); }
+    function shuffle(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex != 0) { randomIndex = Math.floor(Math.random() * currentIndex); currentIndex--; [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]]; }
+        return array;
+    }
+
+    function startRandom(mode) {
+        const names = getNames();
+        const display = document.getElementById('resultDisplay');
+        const spinSound = document.getElementById('spinSound');
+        
+        if (names.length === 0) return alert('กรุณาเลือกห้อง หรือใส่รายชื่อก่อนครับ!');
+
+        spinSound.currentTime = 0; spinSound.play();
+        display.classList.add('animate-spin');
+        
+        let interval = setInterval(() => {
+            const tempName = names[Math.floor(Math.random() * names.length)];
+            display.innerHTML = `<img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(tempName)}&backgroundColor=b6e3f4" alt="avatar">
+                                 <div class="winner-name" style="font-size:3rem; color:#fff;">${tempName}</div>`;
+        }, 50);
+
+        setTimeout(() => {
+            clearInterval(interval);
+            display.classList.remove('animate-spin');
+            spinSound.pause();
+            showResult(mode, names, display);
+        }, 2000);
+    }
+
+    function showResult(mode, names, display) {
+        const shuffled = shuffle([...names]);
+        display.innerHTML = ''; 
+
+        if (mode === 'single') {
+            const winner = shuffled[0];
+            const isChallenge = document.getElementById('challengeMode').checked;
+            
+            document.getElementById('tadaSound').play();
+            confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+
+            let html = `<span style="font-size: 1.5rem; color:#ffd32a; font-weight:bold;">🎉 LUCKY WINNER 🎉</span><br>
+                        <img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(winner)}&backgroundColor=b6e3f4">
+                        <div class="winner-name">${winner}</div>`;
+            
+            if(isChallenge) {
+                const selectedRoom = document.getElementById('savedRooms').value;
+                let roomTasks = allChallenges[selectedRoom];
+                let randomTask = "⚠️ ยังไม่ได้เพิ่มโจทย์สำหรับห้องนี้ในชีต Challenges";
+                
+                if (roomTasks && roomTasks.length > 0) { randomTask = roomTasks[Math.floor(Math.random() * roomTasks.length)]; }
+                html += `<div class="challenge-box">🔥 ภารกิจ: ${randomTask}</div>`;
+            }
+
+            html += `<button class="btn-game btn-score" onclick="giveScore('${winner}', this)">⭐ +1 คะแนนให้ ${winner}</button>`;
+            display.innerHTML = html;
+            
+            let currentNames = getNames().filter(name => name !== winner);
+            document.getElementById('nameList').value = currentNames.join('\n');
+            
+        } 
+        else if (mode === 'pair') {
+            document.getElementById('tadaSound').play();
+            let html = '<div class="result-list"><strong style="color:#ffd32a; font-size:1.5rem;">👥 จับคู่ลุยงาน:</strong><br>';
+            for (let i = 0; i < shuffled.length; i += 2) {
+                const p1 = shuffled[i]; const p2 = shuffled[i+1] ? shuffled[i+1] : '<span style="color:#ff4757;">(ไม่มีคู่/เหงาๆ)</span>';
+                html += `<div class="group-item">${p1} <span style="font-size:1.5rem;">🤝</span> ${p2}</div>`;
+            }
+            html += '</div>'; display.innerHTML = html;
+        } 
+        else if (mode === 'group') {
+            document.getElementById('tadaSound').play();
+            const size = parseInt(document.getElementById('groupSize').value);
+            if(isNaN(size) || size < 2) return alert('ระบุขนาดกลุ่มให้ถูกต้อง');
+            
+            let html = `<div class="result-list"><strong style="color:#ffd32a; font-size:1.5rem;">📦 จัดกลุ่ม (กลุ่มละ ${size} คน):</strong><br>`;
+            let groupNum = 1;
+            for (let i = 0; i < shuffled.length; i += size) {
+                const chunk = shuffled.slice(i, i + size);
+                html += `<div class="group-item"><strong style="color:#2ed573;">ทีมที่ ${groupNum}:</strong> ${chunk.join(', ')}</div>`;
+                groupNum++;
+            }
+            html += '</div>'; display.innerHTML = html;
+        }
+    }
+
+    // ยิง API บันทึกคะแนนผ่าน Fetch
+    async function giveScore(studentName, btnElement) {
+        const room = document.getElementById('savedRooms').value || 'ไม่ได้ระบุห้อง';
+        btnElement.innerHTML = '⏳ กำลังส่งข้อมูล...';
+        btnElement.style.backgroundColor = '#747d8c';
+        btnElement.style.boxShadow = '0 0px 0 #57606f';
+        btnElement.disabled = true;
+
+        try {
+            const url = GAS_API_URL + "?action=recordScore&room=" + encodeURIComponent(room) + "&name=" + encodeURIComponent(studentName);
+            const response = await fetch(url);
+            const result = await response.json();
+            
+            btnElement.innerHTML = result.message;
+            btnElement.style.backgroundColor = '#2ed573';
+            btnElement.style.boxShadow = '0 6px 0 #27ae60';
+            confetti({ particleCount: 50, spread: 40, origin: { y: 0.8 } });
+        } catch (error) {
+            btnElement.innerHTML = '❌ บันทึกไม่สำเร็จ';
+            btnElement.style.backgroundColor = '#ff4757';
+            btnElement.disabled = false;
+        }
+    }
+</script>
+
+</body>
+</html>
