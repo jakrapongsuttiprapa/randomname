@@ -126,15 +126,14 @@
     // ==========================================
     // ⚠️ นำ Web App URL ของ Google Apps Script มาใส่ตรงนี้ ⚠️
     // ==========================================
-    const GAS_API_URL = "YOUR_WEB_APP_URL_HERE"; 
+   const GAS_API_URL = "https://script.google.com/macros/s/AKfycbytDzo2bplb4pGbxvIdQ_IT-VuoqDwIuwnt3iWEzjR1yaqTRfQyS3pfRH8ur_ov0sGHiA/exec";
 
-    function toggleFullScreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => alert(`Error: ${err.message}`));
-        } else if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
-    }
+// ✅ เปลี่ยน string ที่เช็คให้ตรงกับ placeholder จริงๆ
+if (GAS_API_URL === "YOUR_WEB_APP_URL_HERE" || !GAS_API_URL) {
+    document.getElementById('resultDisplay').innerHTML = 
+        '<span style="color:#ff4757; font-size:1.5rem;">⚠️ กรุณาใส่ GAS Web App URL ในโค้ดก่อนครับ</span>';
+    return;
+}
 
     let allClassrooms = {};
     let allChallenges = {}; 
