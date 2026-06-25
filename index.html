@@ -141,10 +141,12 @@
 
     // ดึงข้อมูลผ่าน Fetch API (แทนการใช้ google.script.run)
     async function loadAppData() {
-        if (GAS_API_URL === "https://script.google.com/macros/s/AKfycbytDzo2bplb4pGbxvIdQ_IT-VuoqDwIuwnt3iWEzjR1yaqTRfQyS3pfRH8ur_ov0sGHiA/exec" || !GAS_API_URL) {
-            document.getElementById('resultDisplay').innerHTML = '<span style="color:#ff4757; font-size:1.5rem;">⚠️ กรุณาใส่ GAS Web App URL ในโค้ดก่อนครับ</span>';
-            return;
-        }
+        // ✅ ถูก
+if (GAS_API_URL === "https://script.google.com/macros/s/AKfycbytDzo2bplb4pGbxvIdQ_IT-VuoqDwIuwnt3iWEzjR1yaqTRfQyS3pfRH8ur_ov0sGHiA/exec" || !GAS_API_URL) {
+    document.getElementById('resultDisplay').innerHTML = 
+        '<span style="color:#ff4757; font-size:1.5rem;">⚠️ กรุณาใส่ GAS Web App URL ในโค้ดก่อนครับ</span>';
+    return;
+}
 
         try {
             const response = await fetch(GAS_API_URL + "?action=getAppData");
