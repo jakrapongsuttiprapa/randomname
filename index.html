@@ -124,40 +124,40 @@
 
 <script>
     // ==========================================
-    // ⚠️ นำ Web App URL ของ Google Apps Script มาใส่ตรงนี้ ⚠️
+    // ✅ GAS Web App URL
     // ==========================================
-   const GAS_API_URL = "https://script.google.com/macros/s/AKfycbytDzo2bplb4pGbxvIdQ_IT-VuoqDwIuwnt3iWEzjR1yaqTRfQyS3pfRH8ur_ov0sGHiA/exec";
-
-// ✅ เปลี่ยน string ที่เช็คให้ตรงกับ placeholder จริงๆ
-if (GAS_API_URL === "YOUR_WEB_APP_URL_HERE" || !GAS_API_URL) {
-    document.getElementById('resultDisplay').innerHTML = 
-        '<span style="color:#ff4757; font-size:1.5rem;">⚠️ กรุณาใส่ GAS Web App URL ในโค้ดก่อนครับ</span>';
-    return;
-}
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbytDzo2bplb4pGbxvIdQ_IT-VuoqDwIuwnt3iWEzjR1yaqTRfQyS3pfRH8ur_ov0sGHiA/exec";
 
     let allClassrooms = {};
-    let allChallenges = {}; 
+    let allChallenges = {};
 
-    // ดึงข้อมูลผ่าน Fetch API (แทนการใช้ google.script.run)
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => alert(`Error: ${err.message}`));
+        } else if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+
     async function loadAppData() {
-        // ✅ ถูก
-if (GAS_API_URL === "https://script.google.com/macros/s/AKfycbytDzo2bplb4pGbxvIdQ_IT-VuoqDwIuwnt3iWEzjR1yaqTRfQyS3pfRH8ur_ov0sGHiA/exec" || !GAS_API_URL) {
-    document.getElementById('resultDisplay').innerHTML = 
-        '<span style="color:#ff4757; font-size:1.5rem;">⚠️ กรุณาใส่ GAS Web App URL ในโค้ดก่อนครับ</span>';
-    return;
-}
+        // ✅ guard เช็คแค่ placeholder — ไม่บล็อก URL จริง
+        if (!GAS_API_URL || GAS_API_URL === "YOUR_WEB_APP_URL_HERE") {
+            document.getElementById('resultDisplay').innerHTML =
+                '<span style="color:#ff4757; font-size:1.5rem;">⚠️ กรุณาใส่ GAS Web App URL ในโค้ดก่อนครับ</span>';
+            return;
+        }
 
         try {
             const response = await fetch(GAS_API_URL + "?action=getAppData");
             const data = await response.json();
-            
+
             if (data.Error) {
                 document.getElementById('resultDisplay').innerHTML = '<span style="color:#ff4757;">⚠️ ไม่พบข้อมูล กรุณาตรวจสอบชีต</span>';
                 return;
             }
-            
+
             allClassrooms = data.classrooms;
-            allChallenges = data.challenges; 
+            allChallenges = data.challenges;
             updateRoomDropdown();
             document.getElementById('resultDisplay').innerHTML = '<span style="color: #2ed573; font-size: 2rem;">✅ READY!<br>เลือกระดับชั้นเพื่อเริ่มเกมได้เลย</span>';
         } catch (error) {
@@ -169,7 +169,7 @@ if (GAS_API_URL === "https://script.google.com/macros/s/AKfycbytDzo2bplb4pGbxvId
     function updateRoomDropdown() {
         const dropdown = document.getElementById('savedRooms');
         dropdown.innerHTML = '<option value="">-- คลิกเพื่อเลือกห้องเรียน --</option>';
-        for(let room in allClassrooms) {
+        for (let room in allClassrooms) {
             let option = document.createElement('option');
             option.value = room; option.text = room;
             dropdown.appendChild(option);
@@ -179,7 +179,7 @@ if (GAS_API_URL === "https://script.google.com/macros/s/AKfycbytDzo2bplb4pGbxvId
     function onRoomChange() {
         const selectedRoom = document.getElementById('savedRooms').value;
         const textarea = document.getElementById('nameList');
-        if(selectedRoom && allClassrooms[selectedRoom]) {
+        if (selectedRoom && allClassrooms[selectedRoom]) {
             textarea.value = allClassrooms[selectedRoom].join('\n');
             document.getElementById('resultDisplay').innerHTML = '<span style="color: #1e90ff; font-size: 2.5rem; font-weight: 800;">PRESS START 🎯</span>';
         } else { textarea.value = ''; }
@@ -187,7 +187,7 @@ if (GAS_API_URL === "https://script.google.com/macros/s/AKfycbytDzo2bplb4pGbxvId
 
     function resetRoom() {
         const selectedRoom = document.getElementById('savedRooms').value;
-        if(selectedRoom && allClassrooms[selectedRoom]) {
+        if (selectedRoom && allClassrooms[selectedRoom]) {
             document.getElementById('nameList').value = allClassrooms[selectedRoom].join('\n');
             document.getElementById('resultDisplay').innerHTML = '<span style="color: #ffa502;">🔄 รีเซ็ตรายชื่อครบแล้ว!</span>';
         } else { alert('กรุณาเลือกห้องเรียนก่อนครับ!'); }
@@ -204,12 +204,12 @@ if (GAS_API_URL === "https://script.google.com/macros/s/AKfycbytDzo2bplb4pGbxvId
         const names = getNames();
         const display = document.getElementById('resultDisplay');
         const spinSound = document.getElementById('spinSound');
-        
+
         if (names.length === 0) return alert('กรุณาเลือกห้อง หรือใส่รายชื่อก่อนครับ!');
 
         spinSound.currentTime = 0; spinSound.play();
         display.classList.add('animate-spin');
-        
+
         let interval = setInterval(() => {
             const tempName = names[Math.floor(Math.random() * names.length)];
             display.innerHTML = `<img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(tempName)}&backgroundColor=b6e3f4" alt="avatar">
@@ -226,49 +226,47 @@ if (GAS_API_URL === "https://script.google.com/macros/s/AKfycbytDzo2bplb4pGbxvId
 
     function showResult(mode, names, display) {
         const shuffled = shuffle([...names]);
-        display.innerHTML = ''; 
+        display.innerHTML = '';
 
         if (mode === 'single') {
             const winner = shuffled[0];
             const isChallenge = document.getElementById('challengeMode').checked;
-            
+
             document.getElementById('tadaSound').play();
             confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
 
             let html = `<span style="font-size: 1.5rem; color:#ffd32a; font-weight:bold;">🎉 LUCKY WINNER 🎉</span><br>
                         <img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(winner)}&backgroundColor=b6e3f4">
                         <div class="winner-name">${winner}</div>`;
-            
-            if(isChallenge) {
+
+            if (isChallenge) {
                 const selectedRoom = document.getElementById('savedRooms').value;
                 let roomTasks = allChallenges[selectedRoom];
                 let randomTask = "⚠️ ยังไม่ได้เพิ่มโจทย์สำหรับห้องนี้ในชีต Challenges";
-                
                 if (roomTasks && roomTasks.length > 0) { randomTask = roomTasks[Math.floor(Math.random() * roomTasks.length)]; }
                 html += `<div class="challenge-box">🔥 ภารกิจ: ${randomTask}</div>`;
             }
 
             html += `<button class="btn-game btn-score" onclick="giveScore('${winner}', this)">⭐ +1 คะแนนให้ ${winner}</button>`;
             display.innerHTML = html;
-            
+
             let currentNames = getNames().filter(name => name !== winner);
             document.getElementById('nameList').value = currentNames.join('\n');
-            
-        } 
-        else if (mode === 'pair') {
+
+        } else if (mode === 'pair') {
             document.getElementById('tadaSound').play();
             let html = '<div class="result-list"><strong style="color:#ffd32a; font-size:1.5rem;">👥 จับคู่ลุยงาน:</strong><br>';
             for (let i = 0; i < shuffled.length; i += 2) {
-                const p1 = shuffled[i]; const p2 = shuffled[i+1] ? shuffled[i+1] : '<span style="color:#ff4757;">(ไม่มีคู่/เหงาๆ)</span>';
+                const p1 = shuffled[i]; const p2 = shuffled[i + 1] ? shuffled[i + 1] : '<span style="color:#ff4757;">(ไม่มีคู่/เหงาๆ)</span>';
                 html += `<div class="group-item">${p1} <span style="font-size:1.5rem;">🤝</span> ${p2}</div>`;
             }
             html += '</div>'; display.innerHTML = html;
-        } 
-        else if (mode === 'group') {
+
+        } else if (mode === 'group') {
             document.getElementById('tadaSound').play();
             const size = parseInt(document.getElementById('groupSize').value);
-            if(isNaN(size) || size < 2) return alert('ระบุขนาดกลุ่มให้ถูกต้อง');
-            
+            if (isNaN(size) || size < 2) return alert('ระบุขนาดกลุ่มให้ถูกต้อง');
+
             let html = `<div class="result-list"><strong style="color:#ffd32a; font-size:1.5rem;">📦 จัดกลุ่ม (กลุ่มละ ${size} คน):</strong><br>`;
             let groupNum = 1;
             for (let i = 0; i < shuffled.length; i += size) {
@@ -280,7 +278,6 @@ if (GAS_API_URL === "https://script.google.com/macros/s/AKfycbytDzo2bplb4pGbxvId
         }
     }
 
-    // ยิง API บันทึกคะแนนผ่าน Fetch
     async function giveScore(studentName, btnElement) {
         const room = document.getElementById('savedRooms').value || 'ไม่ได้ระบุห้อง';
         btnElement.innerHTML = '⏳ กำลังส่งข้อมูล...';
@@ -292,7 +289,7 @@ if (GAS_API_URL === "https://script.google.com/macros/s/AKfycbytDzo2bplb4pGbxvId
             const url = GAS_API_URL + "?action=recordScore&room=" + encodeURIComponent(room) + "&name=" + encodeURIComponent(studentName);
             const response = await fetch(url);
             const result = await response.json();
-            
+
             btnElement.innerHTML = result.message;
             btnElement.style.backgroundColor = '#2ed573';
             btnElement.style.boxShadow = '0 6px 0 #27ae60';
