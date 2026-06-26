@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tr. Oat's Lucky Draw</title>
+    <title>Tr. Oat's Lucky Draw Arcade</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -15,86 +15,109 @@
             --purple: #9b59b6; --purple-dark: #8e44ad;
             --dark: #2d3436; --light: #f1f2f6; --gray: #747d8c;
         }
+        * { box-sizing: border-box; }
         body {
             font-family: 'Kanit', sans-serif; margin: 0; padding: 20px;
-            background: radial-gradient(circle at center, #2b1055 0%, #050b14 100%);
-            min-height: 100vh; display: flex; justify-content: center; align-items: center; 
-            color: var(--light); overflow-x: hidden; transition: background 0.5s;
+            background-color: #eef2ff;
+            background-image:
+                radial-gradient(circle at 12% 18%, rgba(255,159,67,0.45) 0%, transparent 38%),
+                radial-gradient(circle at 88% 12%, rgba(46,213,115,0.40) 0%, transparent 36%),
+                radial-gradient(circle at 78% 88%, rgba(30,144,255,0.42) 0%, transparent 40%),
+                radial-gradient(circle at 18% 85%, rgba(155,89,182,0.40) 0%, transparent 38%),
+                radial-gradient(rgba(80,80,140,0.10) 1.5px, transparent 1.5px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 22px 22px;
+            min-height: 100vh; display: flex; justify-content: center; align-items: flex-start;
+            color: var(--light); overflow-x: hidden; transition: background-color 0.5s;
         }
         .fullscreen-btn {
-            position: fixed; top: 20px; right: 20px; background: rgba(255,255,255,0.1); 
-            border: 2px solid rgba(255,255,255,0.3); color: white; font-size: 1.5rem; 
+            position: fixed; top: 20px; right: 20px; background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3); color: white; font-size: 1.5rem;
             padding: 10px 15px; border-radius: 12px; cursor: pointer; z-index: 1000; transition: 0.3s; backdrop-filter: blur(5px);
         }
         .fullscreen-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.1); }
         .container {
-            background: rgba(20,20,30,0.7); padding: 30px; border-radius: 24px;
-            box-shadow: 0 0 40px rgba(0,0,0,0.8), inset 0 0 0 2px rgba(255,255,255,0.1);
-            max-width: 1000px; width: 100%; text-align: center; backdrop-filter: blur(15px); animation: float 6s ease-in-out infinite;
+            background: rgba(18,18,30,0.82); padding: 30px; border-radius: 28px;
+            box-shadow: 0 25px 60px rgba(40,30,90,0.4), 0 0 0 1px rgba(255,255,255,0.08), inset 0 0 0 2px rgba(255,255,255,0.06);
+            max-width: 1100px; width: 100%; text-align: center; backdrop-filter: blur(18px);
         }
-        @keyframes float { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
-        h1 { 
-            font-size: 3rem; margin-bottom: 10px; margin-top: 0; font-weight: 900; letter-spacing: 2px;
+        h1 {
+            font-size: 2.8rem; margin-bottom: 10px; margin-top: 0; font-weight: 900; letter-spacing: 2px;
             background: linear-gradient(to right, var(--primary), var(--warning)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
         /* ── THEME SWITCHER ── */
-        .theme-bar {
-            display: flex; justify-content: center; align-items: center;
-            gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
-        }
+        .theme-bar { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
         .theme-label { font-size: 0.85rem; color: rgba(255,255,255,0.5); font-weight: 600; }
-        .theme-btn {
-            width: 28px; height: 28px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2);
-            cursor: pointer; transition: 0.2s; position: relative;
-        }
+        .theme-btn { width: 28px; height: 28px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); cursor: pointer; transition: 0.2s; }
         .theme-btn:hover, .theme-btn.active { border-color: white; transform: scale(1.25); }
         .theme-btn[data-theme="arcade"]  { background: linear-gradient(135deg,#ff4757,#1e90ff); }
         .theme-btn[data-theme="ocean"]   { background: linear-gradient(135deg,#00cec9,#74b9ff); }
         .theme-btn[data-theme="sunset"]  { background: linear-gradient(135deg,#fd79a8,#fdcb6e); }
         .theme-btn[data-theme="forest"]  { background: linear-gradient(135deg,#55efc4,#00b894); }
         .theme-btn[data-theme="midnight"]{ background: linear-gradient(135deg,#a29bfe,#fd79a8); }
+        .theme-btn[data-theme="casino"]  { background: linear-gradient(135deg,#f1c40f,#e74c3c); }
 
         /* ── STATS BAR ── */
-        .stats-bar {
-            display: flex; justify-content: center; gap: 12px;
-            margin-bottom: 20px; flex-wrap: wrap;
-        }
-        .stat-chip {
-            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 20px; padding: 6px 16px; font-size: 0.95rem; font-weight: 700;
-            display: flex; align-items: center; gap: 6px; transition: 0.3s;
-        }
-        .stat-chip.total  { border-color: rgba(255,255,255,0.3); }
+        .stats-bar { display: flex; justify-content: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+        .stat-chip { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 6px 16px; font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: 0.3s; }
         .stat-chip.drawn  { border-color: var(--warning); color: var(--warning); }
         .stat-chip.remain { border-color: var(--accent);  color: var(--accent); }
         .stat-chip .num   { font-size: 1.3rem; font-weight: 900; }
+        .progress-wrap { background: rgba(255,255,255,0.08); border-radius: 10px; height: 8px; margin-bottom: 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--warning)); border-radius: 10px; transition: width 0.5s ease; width: 0%; }
 
-        /* ── PROGRESS BAR ── */
-        .progress-wrap {
-            background: rgba(255,255,255,0.08); border-radius: 10px; height: 8px;
-            margin-bottom: 20px; overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%; background: linear-gradient(90deg, var(--accent), var(--warning));
-            border-radius: 10px; transition: width 0.5s ease; width: 0%;
-        }
-
-        /* ── EXISTING STYLES ── */
         .layout { display: flex; flex-wrap: wrap; gap: 25px; }
         .input-section { flex: 1; min-width: 320px; display: flex; flex-direction: column; gap: 15px; }
-        .result-section { flex: 1.2; min-width: 350px; }
+        .result-section { flex: 1.3; min-width: 360px; }
         .glass-panel { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.1); text-align: left; }
         select, textarea, input[type="number"] {
             width: 100%; padding: 12px; border-radius: 12px; font-family: 'Kanit', sans-serif; font-size: 1.1rem; font-weight: 600;
-            background: rgba(255,255,255,0.9); color: var(--dark); border: 3px solid transparent; outline: none; transition: 0.3s; box-sizing: border-box;
+            background: rgba(255,255,255,0.9); color: var(--dark); border: 3px solid transparent; outline: none; transition: 0.3s;
         }
         select:focus, textarea:focus, input[type="number"]:focus { border-color: var(--warning); box-shadow: 0 0 15px rgba(255,165,2,0.5); }
-        textarea { height: 130px; resize: none; font-weight: 400; }
-        .toggle-section { background: rgba(255,165,2,0.15); border: 2px dashed var(--warning); padding: 12px; border-radius: 12px; font-weight: bold; color: #ffd32a; display: flex; align-items: center; cursor: pointer; }
+        textarea { height: 120px; resize: none; font-weight: 400; }
+        /* ── กรอบแสงเรืองไหลรอบกล่องรายชื่อ ── */
+        .namelist-glow {
+            position: relative; padding: 4px; border-radius: 16px;
+            background: linear-gradient(var(--primary), var(--warning), var(--accent), var(--secondary), var(--purple));
+            background-size: 300% 300%;
+            animation: glowFlow 6s ease infinite;
+            box-shadow: 0 0 22px rgba(46,213,115,0.45), 0 0 40px rgba(30,144,255,0.25);
+        }
+        .namelist-glow::before {
+            content: ''; position: absolute; inset: -3px; border-radius: 18px; z-index: -1;
+            background: inherit; background-size: 300% 300%;
+            animation: glowFlow 6s ease infinite;
+            filter: blur(12px); opacity: 0.55;
+        }
+        .namelist-glow textarea { position: relative; margin: 0; display: block; border-radius: 12px; background: rgba(255,255,255,0.96); }
+        @keyframes glowFlow {
+            0%   { background-position: 0% 0%; }
+            50%  { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+        /* ── ICON TOGGLES (ปุ่มไอคอนแทน checkbox ยาว) ── */
+        .toggle-row { display: flex; gap: 10px; justify-content: center; }
+        .icon-toggle {
+            flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+            background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.12);
+            border-radius: 16px; padding: 12px 6px; cursor: pointer; transition: all 0.25s;
+            position: relative; overflow: hidden; user-select: none;
+        }
+        .icon-toggle .ic { font-size: 1.7rem; filter: grayscale(0.6) opacity(0.55); transition: 0.25s; }
+        .icon-toggle .state { font-size: 0.72rem; font-weight: 900; letter-spacing: 1px; color: var(--gray); transition: 0.25s; }
+        .icon-toggle:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.3); }
+        .icon-toggle.on {
+            background: linear-gradient(160deg, rgba(46,213,115,0.22), rgba(30,144,255,0.18));
+            border-color: var(--accent);
+            box-shadow: 0 0 18px rgba(46,213,115,0.35), inset 0 0 12px rgba(46,213,115,0.1);
+        }
+        .icon-toggle.on .ic { filter: none; transform: scale(1.1); }
+        .icon-toggle.on .state { color: var(--accent); text-shadow: 0 0 8px rgba(46,213,115,0.6); }
         .controls { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
-        button.btn-game { padding: 12px 10px; border: none; border-radius: 12px; font-family: 'Kanit', sans-serif; font-size: 1.1rem; font-weight: 800; color: white; cursor: pointer; text-transform: uppercase; position: relative; top: 0; transition: all 0.1s; }
+        button.btn-game { padding: 12px 10px; border: none; border-radius: 12px; font-family: 'Kanit', sans-serif; font-size: 1.05rem; font-weight: 800; color: white; cursor: pointer; text-transform: uppercase; position: relative; top: 0; transition: all 0.1s; }
         button.btn-game:active { top: 6px; }
+        button.btn-game:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-single { background-color: var(--primary); box-shadow: 0 6px 0 var(--primary-dark); }
         .btn-single:active { box-shadow: 0 0px 0 var(--primary-dark); }
         .btn-pair { background-color: var(--secondary); box-shadow: 0 6px 0 var(--secondary-dark); }
@@ -103,56 +126,110 @@
         .btn-reset:active { box-shadow: 0 0px 0 #57606f; }
         .btn-group { background-color: var(--purple); box-shadow: 0 6px 0 var(--purple-dark); flex: 1; }
         .btn-group:active { box-shadow: 0 0px 0 var(--purple-dark); }
-        .btn-score { background-color: var(--accent); box-shadow: 0 6px 0 var(--accent-dark); margin-top: 20px; font-size: 1.3rem; padding: 12px 25px; animation: bounceIn 0.5s; width: 80%; }
+        .btn-score { background-color: var(--accent); box-shadow: 0 6px 0 var(--accent-dark); margin-top: 18px; font-size: 1.2rem; padding: 12px 25px; animation: bounceIn 0.5s; width: 85%; }
         .btn-score:active { box-shadow: 0 0px 0 var(--accent-dark); }
         .group-setting { display: flex; align-items: center; gap: 10px; }
         .group-setting input { width: 70px; text-align: center; padding: 10px; }
+
+        /* ── RESULT / STAGE ── */
         .result-box {
             background: linear-gradient(180deg,rgba(30,39,46,0.9) 0%,rgba(11,23,42,0.9) 100%);
-            border: 4px solid var(--secondary); border-radius: 20px; min-height: 450px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            border: 4px solid var(--secondary); border-radius: 20px; min-height: 480px; display: flex; flex-direction: column; justify-content: center; align-items: center;
             box-shadow: 0 0 30px rgba(30,144,255,0.3), inset 0 0 20px rgba(0,0,0,0.8); position: relative; overflow: hidden; padding: 30px;
         }
-        .avatar { width: 140px; height: 140px; background: white; border-radius: 50%; padding: 5px; margin-bottom: 15px; border: 5px solid var(--warning); box-shadow: 0 0 25px var(--warning); }
-        .winner-name { font-size: 4rem; font-weight: 900; color: #fff; text-shadow: 0 0 10px var(--secondary), 0 0 20px var(--secondary), 0 0 40px var(--primary); margin: 10px 0; text-align: center; line-height: 1.1; letter-spacing: 1px; }
-        .challenge-box { background: rgba(255,255,255,0.95); color: var(--dark); padding: 15px 20px; border-radius: 12px; border-left: 8px solid var(--warning); margin-top: 15px; font-size: 1.4rem; font-weight: 600; max-width: 90%; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .result-list { font-size: 1.3rem; text-align: left; width: 100%; max-height: 400px; overflow-y: auto; }
-        .group-item { background: rgba(255,255,255,0.1); margin: 10px 0; padding: 12px; border-radius: 10px; border-left: 6px solid var(--warning); }
-        .animate-spin { animation: screenShake 0.1s infinite alternate; }
-        @keyframes screenShake { from { transform: translate(-2px,1px); filter: brightness(1.2); } to { transform: translate(2px,-1px); filter: brightness(0.8); } }
+        .avatar { width: 130px; height: 130px; background: white; border-radius: 50%; padding: 5px; margin-bottom: 12px; border: 5px solid var(--warning); box-shadow: 0 0 25px var(--warning); }
+        .winner-name { font-size: 3.5rem; font-weight: 900; color: #fff; text-shadow: 0 0 10px var(--secondary), 0 0 20px var(--secondary), 0 0 40px var(--primary); margin: 8px 0; text-align: center; line-height: 1.1; letter-spacing: 1px; }
+        .challenge-box { background: rgba(255,255,255,0.95); color: var(--dark); padding: 14px 20px; border-radius: 12px; border-left: 8px solid var(--warning); margin-top: 14px; font-size: 1.3rem; font-weight: 600; max-width: 90%; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .result-list { font-size: 1.25rem; text-align: left; width: 100%; max-height: 420px; overflow-y: auto; }
+        .group-item { background: rgba(255,255,255,0.1); margin: 9px 0; padding: 12px; border-radius: 10px; border-left: 6px solid var(--warning); }
         @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); opacity:1; } 100% { transform: scale(1); } }
+
+        /* ── SLOT MACHINE ── */
+        .slot-stage { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .slot-machine {
+            background: linear-gradient(160deg, #2c2c3a 0%, #15151e 100%);
+            border-radius: 22px; padding: 22px 26px 18px;
+            box-shadow: 0 0 0 6px var(--warning), 0 0 35px rgba(0,0,0,0.7), inset 0 0 20px rgba(0,0,0,0.6);
+            position: relative; max-width: 92%;
+        }
+        .slot-machine::before, .slot-machine::after {
+            content: ''; position: absolute; top: 50%; transform: translateY(-50%);
+            width: 16px; height: 16px; border-radius: 50%; background: var(--primary);
+            box-shadow: 0 0 12px var(--primary); animation: bulbBlink 0.6s infinite alternate;
+        }
+        .slot-machine::before { left: 6px; } .slot-machine::after { right: 6px; }
+        @keyframes bulbBlink { from { opacity: 0.3; } to { opacity: 1; } }
+        .slot-title { color: var(--warning); font-weight: 900; font-size: 1.1rem; letter-spacing: 2px; margin-bottom: 12px; text-shadow: 0 0 8px var(--warning); }
+        .slot-window {
+            position: relative; width: 300px; max-width: 78vw; height: 150px; overflow: hidden;
+            background: #0a0a12; border-radius: 14px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.9), inset 0 8px 12px rgba(0,0,0,0.8), inset 0 -8px 12px rgba(0,0,0,0.8);
+            border: 3px solid rgba(255,255,255,0.1);
+        }
+        .slot-reel { position: absolute; top: 0; left: 0; width: 100%; will-change: transform; }
+        .slot-item {
+            height: 50px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; font-weight: 800; color: #fff; white-space: nowrap;
+            padding: 0 8px; overflow: hidden; text-overflow: ellipsis;
+        }
+        /* แถบไฮไลต์ช่องกลาง (ช่องที่ล็อก) */
+        .slot-line {
+            position: absolute; top: 50px; left: 0; width: 100%; height: 50px; z-index: 3; pointer-events: none;
+            border-top: 3px solid var(--warning); border-bottom: 3px solid var(--warning);
+            box-shadow: 0 0 18px var(--warning), inset 0 0 18px rgba(255,165,2,0.25);
+        }
+        .slot-line::before, .slot-line::after {
+            content: '▶'; position: absolute; top: 50%; transform: translateY(-50%);
+            color: var(--warning); font-size: 1.2rem; text-shadow: 0 0 8px var(--warning);
+        }
+        .slot-line::before { left: -2px; } .slot-line::after { right: -2px; content: '◀'; }
+        /* เงาบน-ล่างให้ดูเหมือนกระจกโค้ง */
+        .slot-fade { position: absolute; left:0; width:100%; height:50px; z-index:2; pointer-events:none; }
+        .slot-fade.top    { top:0;    background: linear-gradient(to bottom, #0a0a12, transparent); }
+        .slot-fade.bottom { bottom:0; background: linear-gradient(to top, #0a0a12, transparent); }
+        .slot-locked .slot-item.center-win { color: var(--warning); text-shadow: 0 0 12px var(--warning); animation: winPulse 0.5s ease infinite alternate; }
+        @keyframes winPulse { from { transform: scale(1); } to { transform: scale(1.12); } }
+
+        /* ── HISTORY PANEL ── */
+        .history-panel { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 14px; text-align: left; }
+        .history-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .history-head strong { color: #ffd32a; font-size: 1.05rem; }
+        .history-clear { background: rgba(255,71,87,0.2); border: 1px solid var(--primary); color: #ff7081; border-radius: 8px; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; font-family: 'Kanit', sans-serif; font-weight: 600; }
+        .history-list { display: flex; flex-wrap: wrap; gap: 6px; max-height: 110px; overflow-y: auto; }
+        .history-chip { background: rgba(255,255,255,0.1); border-radius: 14px; padding: 4px 12px; font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 5px; animation: bounceIn 0.4s; }
+        .history-chip .seq { color: var(--warning); font-weight: 900; }
+        .history-empty { color: var(--gray); font-size: 0.9rem; font-style: italic; }
+
+        .animate-shake { animation: screenShake 0.1s infinite alternate; }
+        @keyframes screenShake { from { transform: translate(-2px,1px); filter: brightness(1.2); } to { transform: translate(2px,-1px); filter: brightness(0.8); } }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 10px; }
     </style>
 </head>
-<body onload="loadAppData()">
+<body onload="applyTheme('arcade'); loadAppData()">
 
 <button class="fullscreen-btn" onclick="toggleFullScreen()" title="เต็มหน้าจอ">🔲</button>
-<audio id="spinSound" src="https://actions.google.com/sounds/v1/science_fiction/space_computer_processing.ogg" preload="auto" crossorigin="anonymous"></audio>
-<audio id="tadaSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_success_fanfare.ogg" preload="auto" crossorigin="anonymous"></audio>
 
 <div class="container">
-    <h1>🎮 𝐋𝐔𝐂𝐊𝐘 𝐃𝐑𝐀𝐖 𝐀𝐑𝐂𝐀𝐃𝐄 🎯</h1>
+    <h1>🎰 𝐋𝐔𝐂𝐊𝐘 𝐃𝐑𝐀𝐖 𝐀𝐑𝐂𝐀𝐃𝐄 🎯</h1>
 
-    <!-- ── THEME SWITCHER ── -->
     <div class="theme-bar">
         <span class="theme-label">🎨 ธีม:</span>
-        <div class="theme-btn active" data-theme="arcade"   title="Arcade (Default)" onclick="applyTheme('arcade')"></div>
-        <div class="theme-btn"        data-theme="ocean"    title="Ocean"            onclick="applyTheme('ocean')"></div>
-        <div class="theme-btn"        data-theme="sunset"   title="Sunset"           onclick="applyTheme('sunset')"></div>
-        <div class="theme-btn"        data-theme="forest"   title="Forest"           onclick="applyTheme('forest')"></div>
-        <div class="theme-btn"        data-theme="midnight" title="Midnight"         onclick="applyTheme('midnight')"></div>
+        <div class="theme-btn active" data-theme="arcade"   title="Arcade"   onclick="applyTheme('arcade')"></div>
+        <div class="theme-btn"        data-theme="ocean"    title="Ocean"    onclick="applyTheme('ocean')"></div>
+        <div class="theme-btn"        data-theme="sunset"   title="Sunset"   onclick="applyTheme('sunset')"></div>
+        <div class="theme-btn"        data-theme="forest"   title="Forest"   onclick="applyTheme('forest')"></div>
+        <div class="theme-btn"        data-theme="midnight" title="Midnight" onclick="applyTheme('midnight')"></div>
+        <div class="theme-btn"        data-theme="casino"   title="Casino Gold" onclick="applyTheme('casino')"></div>
     </div>
 
-    <!-- ── STATS BAR ── -->
     <div class="stats-bar">
         <div class="stat-chip total">📋 ทั้งหมด <span class="num" id="statTotal">0</span> คน</div>
         <div class="stat-chip drawn">✅ สุ่มแล้ว <span class="num" id="statDrawn">0</span> คน</div>
         <div class="stat-chip remain">⏳ เหลือ <span class="num" id="statRemain">0</span> คน</div>
     </div>
-    <div class="progress-wrap">
-        <div class="progress-fill" id="progressFill"></div>
-    </div>
+    <div class="progress-wrap"><div class="progress-fill" id="progressFill"></div></div>
 
     <div class="layout">
         <div class="input-section">
@@ -162,13 +239,27 @@
                     <option value="">-- กำลังเชื่อมต่อฐานข้อมูล... ⏳ --</option>
                 </select>
             </div>
-            <textarea id="nameList" placeholder="รายชื่อนักเรียนจะแสดงที่นี่" oninput="updateStats()"></textarea>
-            <label class="toggle-section">
-                <input type="checkbox" id="challengeMode" checked style="transform:scale(1.5);margin-right:15px;">
-                🎯 เปิดโหมดสุ่มคำถาม / ภารกิจสุดโหด!
-            </label>
+            <div class="namelist-glow">
+                <textarea id="nameList" placeholder="รายชื่อนักเรียนจะแสดงที่นี่" oninput="onListEdit()"></textarea>
+            </div>
+
+            <div class="toggle-row">
+                <input type="checkbox" id="challengeMode" hidden>
+                <input type="checkbox" id="noRepeatMode" checked hidden>
+                <input type="checkbox" id="soundMode" checked hidden>
+                <div class="icon-toggle" data-target="challengeMode" onclick="toggleIcon(this)" title="โหมดสุ่มคำถาม / ภารกิจ">
+                    <span class="ic">🎯</span><span class="state">OFF</span>
+                </div>
+                <div class="icon-toggle on" data-target="noRepeatMode" onclick="toggleIcon(this)" title="โหมดไม่ซ้ำคน">
+                    <span class="ic">🚫</span><span class="state">ON</span>
+                </div>
+                <div class="icon-toggle on" data-target="soundMode" onclick="toggleIcon(this)" title="เสียง &amp; เอฟเฟกต์">
+                    <span class="ic">🔊</span><span class="state">ON</span>
+                </div>
+            </div>
+
             <div class="controls">
-                <button class="btn-game btn-single" onclick="startRandom('single')">👤 สุ่ม 1 คน</button>
+                <button class="btn-game btn-single" onclick="startRandom('single')">🎰 สุ่ม 1 คน</button>
                 <button class="btn-game btn-pair"   onclick="startRandom('pair')">👥 จับคู่</button>
                 <button class="btn-game btn-reset"  onclick="resetRoom()">🔄 รีเซ็ตชื่อ</button>
             </div>
@@ -178,7 +269,18 @@
                 <input type="number" id="groupSize" value="3" min="2" max="10">
                 <span style="font-weight:bold;color:white;">คน</span>
             </div>
+
+            <div class="history-panel">
+                <div class="history-head">
+                    <strong>📜 ประวัติการสุ่ม (<span id="historyCount">0</span>)</strong>
+                    <button class="history-clear" onclick="clearHistory()">🗑️ ล้าง</button>
+                </div>
+                <div class="history-list" id="historyList">
+                    <span class="history-empty">ยังไม่มีประวัติการสุ่ม</span>
+                </div>
+            </div>
         </div>
+
         <div class="result-section">
             <div id="resultDisplay" class="result-box">
                 <span style="color:#747d8c;font-size:1.8rem;font-weight:600;">รอโหลดระบบ... ⏳</span>
@@ -189,102 +291,136 @@
 
 <script>
     // ==========================================
-    // ✅ GAS Web App URL
+    // ✅ GAS Web App URL (เหมือนเดิม)
     // ==========================================
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbytDzo2bplb4pGbxvIdQ_IT-VuoqDwIuwnt3iWEzjR1yaqTRfQyS3pfRH8ur_ov0sGHiA/exec";
 
     let allClassrooms = {};
     let allChallenges = {};
-    let totalInRoom   = 0; // จำนวนเดิมของห้องที่เลือก
+    let totalInRoom   = 0;
+    let drawHistory   = [];   // เก็บประวัติคนที่ถูกสุ่ม
+    let isSpinning    = false;
 
     // ==========================================
-    // 🎨 THEME SYSTEM (ใหม่ — ไม่กระทบโค้ดเดิม)
+    // 🔊 WEB AUDIO (สร้างเสียงเองในเบราว์เซอร์ — ไม่ต้องโหลดไฟล์)
     // ==========================================
+    let audioCtx = null;
+    function ensureAudio() {
+        if (!audioCtx) {
+            try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    }
+    function soundOn() { return document.getElementById('soundMode').checked; }
+
+    // ปุ่มไอคอน toggle (แทน checkbox ยาวๆ)
+    function toggleIcon(el) {
+        const cb = document.getElementById(el.dataset.target);
+        cb.checked = !cb.checked;
+        el.classList.toggle('on', cb.checked);
+        el.querySelector('.state').textContent = cb.checked ? 'ON' : 'OFF';
+        ensureAudio();
+        beep(cb.checked ? 900 : 500, 0.06, 'sine', 0.07);
+    }
+    function beep(freq, dur, type, vol) {
+        if (!soundOn() || !audioCtx) return;
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = type || 'square';
+        o.frequency.value = freq;
+        g.gain.value = vol || 0.08;
+        o.connect(g); g.connect(audioCtx.destination);
+        const t = audioCtx.currentTime;
+        g.gain.setValueAtTime(g.gain.value, t);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.start(t); o.stop(t + dur);
+    }
+    function tickSound() { beep(880 + Math.random()*120, 0.04, 'square', 0.05); }
+    function winSound() {
+        if (!soundOn()) return;
+        [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.18, 'triangle', 0.1), i*120));
+    }
+    function scoreSound() { [784, 1047].forEach((f,i)=>setTimeout(()=>beep(f,0.12,'sine',0.09), i*90)); }
+
+    // ==========================================
+    // 🎨 THEME SYSTEM
+    // ==========================================
+    // helper: สร้างพื้นหลังสว่างมีลายจุด + blob 4 สี
+    function lightBG(base, c1, c2, c3, c4) {
+        return `radial-gradient(circle at 12% 18%, ${c1} 0%, transparent 38%),`
+             + `radial-gradient(circle at 88% 12%, ${c2} 0%, transparent 36%),`
+             + `radial-gradient(circle at 78% 88%, ${c3} 0%, transparent 40%),`
+             + `radial-gradient(circle at 18% 85%, ${c4} 0%, transparent 38%),`
+             + `radial-gradient(rgba(80,80,140,0.10) 1.5px, transparent 1.5px)`;
+    }
     const themes = {
-        arcade: {
-            bg: 'radial-gradient(circle at center,#2b1055 0%,#050b14 100%)',
-            primary:'#ff4757', primaryDark:'#c0392b',
-            secondary:'#1e90ff', secondaryDark:'#0984e3',
-            accent:'#2ed573', accentDark:'#27ae60',
-            warning:'#ffa502',
-        },
-        ocean: {
-            bg: 'radial-gradient(circle at center,#0a3d62 0%,#020f1a 100%)',
-            primary:'#00cec9', primaryDark:'#00a8a3',
-            secondary:'#74b9ff', secondaryDark:'#0984e3',
-            accent:'#55efc4', accentDark:'#00b894',
-            warning:'#fdcb6e',
-        },
-        sunset: {
-            bg: 'radial-gradient(circle at center,#6b2737 0%,#1a0a0a 100%)',
-            primary:'#fd79a8', primaryDark:'#e84393',
-            secondary:'#fdcb6e', secondaryDark:'#e17055',
-            accent:'#fd79a8', accentDark:'#e84393',
-            warning:'#fdcb6e',
-        },
-        forest: {
-            bg: 'radial-gradient(circle at center,#1a472a 0%,#0a1a0f 100%)',
-            primary:'#55efc4', primaryDark:'#00b894',
-            secondary:'#81ecec', secondaryDark:'#00cec9',
-            accent:'#ffeaa7', accentDark:'#fdcb6e',
-            warning:'#ffeaa7',
-        },
-        midnight: {
-            bg: 'radial-gradient(circle at center,#2d3436 0%,#000000 100%)',
-            primary:'#a29bfe', primaryDark:'#6c5ce7',
-            secondary:'#fd79a8', secondaryDark:'#e84393',
-            accent:'#ffeaa7', accentDark:'#fdcb6e',
-            warning:'#ffeaa7',
-        },
+        arcade:   { base:'#eef2ff', blobs:['rgba(255,159,67,0.45)','rgba(46,213,115,0.40)','rgba(30,144,255,0.42)','rgba(155,89,182,0.40)'], primary:'#ff4757',primaryDark:'#c0392b',secondary:'#1e90ff',secondaryDark:'#0984e3',accent:'#2ed573',accentDark:'#27ae60',warning:'#ffa502' },
+        ocean:    { base:'#e6f7ff', blobs:['rgba(0,206,201,0.45)','rgba(116,185,255,0.45)','rgba(9,132,227,0.38)','rgba(85,239,196,0.42)'], primary:'#00cec9',primaryDark:'#00a8a3',secondary:'#0984e3',secondaryDark:'#0652DD',accent:'#00b894',accentDark:'#009975',warning:'#fdcb6e' },
+        sunset:   { base:'#fff0f3', blobs:['rgba(253,121,168,0.45)','rgba(253,203,110,0.50)','rgba(225,112,85,0.40)','rgba(232,67,147,0.38)'], primary:'#e84393',primaryDark:'#c0307a',secondary:'#e17055',secondaryDark:'#c0392b',accent:'#fdcb6e',accentDark:'#e6a817',warning:'#fd79a8' },
+        forest:   { base:'#edfff4', blobs:['rgba(85,239,196,0.50)','rgba(0,184,148,0.42)','rgba(129,236,236,0.45)','rgba(255,234,167,0.50)'], primary:'#00b894',primaryDark:'#009975',secondary:'#00cec9',secondaryDark:'#00a8a3',accent:'#fdcb6e',accentDark:'#e6a817',warning:'#00b894' },
+        midnight: { base:'#f0eeff', blobs:['rgba(162,155,254,0.50)','rgba(253,121,168,0.42)','rgba(108,92,231,0.40)','rgba(255,234,167,0.45)'], primary:'#6c5ce7',primaryDark:'#5341c4',secondary:'#e84393',secondaryDark:'#c0307a',accent:'#a29bfe',accentDark:'#8075e0',warning:'#fdcb6e' },
+        casino:   { base:'#fffbe6', blobs:['rgba(241,196,15,0.50)','rgba(231,76,60,0.42)','rgba(46,204,113,0.42)','rgba(241,196,15,0.45)'], primary:'#e74c3c',primaryDark:'#c0392b',secondary:'#d4ac0d',secondaryDark:'#b8950b',accent:'#27ae60',accentDark:'#1e8449',warning:'#f1c40f' },
     };
-
     function applyTheme(name) {
-        const t = themes[name];
-        if (!t) return;
+        const t = themes[name]; if (!t) return;
+        const b = t.blobs;
+        document.body.style.backgroundColor = t.base;
+        document.body.style.backgroundImage = lightBG(t.base, b[0], b[1], b[2], b[3]);
+        document.body.style.backgroundSize = '100% 100%, 100% 100%, 100% 100%, 100% 100%, 22px 22px';
         const r = document.documentElement.style;
-        document.body.style.background = t.bg;
-        r.setProperty('--primary',       t.primary);
-        r.setProperty('--primary-dark',  t.primaryDark);
-        r.setProperty('--secondary',     t.secondary);
-        r.setProperty('--secondary-dark',t.secondaryDark);
-        r.setProperty('--accent',        t.accent);
-        r.setProperty('--accent-dark',   t.accentDark);
-        r.setProperty('--warning',       t.warning);
-        // อัปเดตปุ่มที่ active
-        document.querySelectorAll('.theme-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.theme === name);
-        });
+        r.setProperty('--primary',t.primary); r.setProperty('--primary-dark',t.primaryDark);
+        r.setProperty('--secondary',t.secondary); r.setProperty('--secondary-dark',t.secondaryDark);
+        r.setProperty('--accent',t.accent); r.setProperty('--accent-dark',t.accentDark);
+        r.setProperty('--warning',t.warning);
+        document.querySelectorAll('.theme-btn').forEach(b => b.classList.toggle('active', b.dataset.theme === name));
     }
 
     // ==========================================
-    // 📊 STATS SYSTEM (ใหม่ — ไม่กระทบโค้ดเดิม)
+    // 📊 STATS + HISTORY
     // ==========================================
     function updateStats() {
         const remaining = getNames().length;
-        const drawn     = totalInRoom - remaining;
-        const pct       = totalInRoom > 0 ? (drawn / totalInRoom) * 100 : 0;
-
-        document.getElementById('statTotal').textContent  = totalInRoom;
-        document.getElementById('statDrawn').textContent  = Math.max(0, drawn);
+        const drawn = totalInRoom - remaining;
+        const pct = totalInRoom > 0 ? (drawn / totalInRoom) * 100 : 0;
+        document.getElementById('statTotal').textContent = totalInRoom;
+        document.getElementById('statDrawn').textContent = Math.max(0, drawn);
         document.getElementById('statRemain').textContent = remaining;
         document.getElementById('progressFill').style.width = pct + '%';
     }
+    function onListEdit() { updateStats(); }
+
+    function addHistory(name) {
+        drawHistory.push(name);
+        renderHistory();
+    }
+    function renderHistory() {
+        const list = document.getElementById('historyList');
+        document.getElementById('historyCount').textContent = drawHistory.length;
+        if (drawHistory.length === 0) {
+            list.innerHTML = '<span class="history-empty">ยังไม่มีประวัติการสุ่ม</span>';
+            return;
+        }
+        list.innerHTML = drawHistory.map((n, i) =>
+            `<span class="history-chip"><span class="seq">${i+1}.</span> ${n}</span>`
+        ).join('');
+        list.scrollTop = list.scrollHeight;
+    }
+    function clearHistory() {
+        drawHistory = [];
+        renderHistory();
+    }
 
     // ==========================================
-    // ✅ CORE FUNCTIONS (เหมือนเดิมทุกอย่าง)
+    // ✅ CORE (API เหมือนเดิม)
     // ==========================================
     function toggleFullScreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => alert(`Error: ${err.message}`));
-        } else if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err => alert(`Error: ${err.message}`));
+        else if (document.exitFullscreen) document.exitFullscreen();
     }
 
     async function loadAppData() {
         if (!GAS_API_URL || GAS_API_URL === "YOUR_WEB_APP_URL_HERE") {
-            document.getElementById('resultDisplay').innerHTML =
-                '<span style="color:#ff4757;font-size:1.5rem;">⚠️ กรุณาใส่ GAS Web App URL ในโค้ดก่อนครับ</span>';
+            document.getElementById('resultDisplay').innerHTML = '<span style="color:#ff4757;font-size:1.5rem;">⚠️ กรุณาใส่ GAS Web App URL ในโค้ดก่อนครับ</span>';
             return;
         }
         try {
@@ -308,135 +444,234 @@
         const dropdown = document.getElementById('savedRooms');
         dropdown.innerHTML = '<option value="">-- คลิกเพื่อเลือกห้องเรียน --</option>';
         for (let room in allClassrooms) {
-            let option = document.createElement('option');
-            option.value = room; option.text = room;
-            dropdown.appendChild(option);
+            let o = document.createElement('option');
+            o.value = room; o.text = room; dropdown.appendChild(o);
         }
     }
 
     function onRoomChange() {
-        const selectedRoom = document.getElementById('savedRooms').value;
-        const textarea = document.getElementById('nameList');
-        if (selectedRoom && allClassrooms[selectedRoom]) {
-            textarea.value = allClassrooms[selectedRoom].join('\n');
-            totalInRoom = allClassrooms[selectedRoom].length; // ✅ เซ็ต total
+        const room = document.getElementById('savedRooms').value;
+        const ta = document.getElementById('nameList');
+        clearHistory();
+        if (room && allClassrooms[room]) {
+            ta.value = allClassrooms[room].join('\n');
+            totalInRoom = allClassrooms[room].length;
             updateStats();
-            document.getElementById('resultDisplay').innerHTML = '<span style="color:#1e90ff;font-size:2.5rem;font-weight:800;">PRESS START 🎯</span>';
-        } else {
-            textarea.value = '';
-            totalInRoom = 0;
-            updateStats();
-        }
+            document.getElementById('resultDisplay').innerHTML = '<span style="color:#1e90ff;font-size:2.5rem;font-weight:800;">PRESS START 🎰</span>';
+        } else { ta.value = ''; totalInRoom = 0; updateStats(); }
     }
 
     function resetRoom() {
-        const selectedRoom = document.getElementById('savedRooms').value;
-        if (selectedRoom && allClassrooms[selectedRoom]) {
-            document.getElementById('nameList').value = allClassrooms[selectedRoom].join('\n');
-            totalInRoom = allClassrooms[selectedRoom].length; // ✅ รีเซ็ต total ด้วย
+        const room = document.getElementById('savedRooms').value;
+        if (room && allClassrooms[room]) {
+            document.getElementById('nameList').value = allClassrooms[room].join('\n');
+            totalInRoom = allClassrooms[room].length;
+            clearHistory();
             updateStats();
             document.getElementById('resultDisplay').innerHTML = '<span style="color:#ffa502;">🔄 รีเซ็ตรายชื่อครบแล้ว!</span>';
         } else { alert('กรุณาเลือกห้องเรียนก่อนครับ!'); }
     }
 
     function getNames() { return document.getElementById('nameList').value.split('\n').map(n => n.trim()).filter(n => n !== ''); }
-    function shuffle(array) {
-        let cur = array.length, r;
-        while (cur != 0) { r = Math.floor(Math.random() * cur); cur--; [array[cur], array[r]] = [array[r], array[cur]]; }
-        return array;
-    }
+    function shuffle(a) { let c=a.length,r; while(c!=0){r=Math.floor(Math.random()*c);c--;[a[c],a[r]]=[a[r],a[c]];} return a; }
 
     function startRandom(mode) {
+        if (isSpinning) return;
         const names = getNames();
-        const display = document.getElementById('resultDisplay');
-        const spinSound = document.getElementById('spinSound');
         if (names.length === 0) return alert('กรุณาเลือกห้อง หรือใส่รายชื่อก่อนครับ!');
-        spinSound.currentTime = 0; spinSound.play();
-        display.classList.add('animate-spin');
-        let interval = setInterval(() => {
-            const t = names[Math.floor(Math.random() * names.length)];
-            display.innerHTML = `<img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(t)}&backgroundColor=b6e3f4">
-                                 <div class="winner-name" style="font-size:3rem;">${t}</div>`;
-        }, 50);
-        setTimeout(() => {
-            clearInterval(interval);
-            display.classList.remove('animate-spin');
-            spinSound.pause();
-            showResult(mode, names, display);
-        }, 2000);
-    }
-
-    function showResult(mode, names, display) {
-        const shuffled = shuffle([...names]);
-        display.innerHTML = '';
+        ensureAudio();
 
         if (mode === 'single') {
-            const winner = shuffled[0];
-            const isChallenge = document.getElementById('challengeMode').checked;
-            document.getElementById('tadaSound').play();
-            confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+            spinSlot(names);
+        } else {
+            // pair / group ใช้แอนิเมชันสั่นจอแบบเดิม (เร็ว เหมาะกับหลายชื่อ)
+            quickShuffleAnim(mode, names);
+        }
+    }
 
-            let html = `<span style="font-size:1.5rem;color:#ffd32a;font-weight:bold;">🎉 LUCKY WINNER 🎉</span><br>
-                        <img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(winner)}&backgroundColor=b6e3f4">
-                        <div class="winner-name">${winner}</div>`;
+    // ==========================================
+    // 🎰 SLOT MACHINE
+    // ==========================================
+    const ITEM_H = 50;          // ความสูงของแต่ละชื่อ (ต้องตรงกับ .slot-item ใน CSS)
+    const VISIBLE = 3;          // จำนวนช่องที่เห็น (บน-กลาง-ล่าง) ช่องกลางคือช่องล็อก
 
-            if (isChallenge) {
-                const selectedRoom = document.getElementById('savedRooms').value;
-                let roomTasks = allChallenges[selectedRoom];
-                let randomTask = "⚠️ ยังไม่ได้เพิ่มโจทย์สำหรับห้องนี้ในชีต Challenges";
-                if (roomTasks && roomTasks.length > 0) { randomTask = roomTasks[Math.floor(Math.random() * roomTasks.length)]; }
-                html += `<div class="challenge-box">🔥 ภารกิจ: ${randomTask}</div>`;
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function spinSlot(names) {
+        isSpinning = true;
+        const display = document.getElementById('resultDisplay');
+
+        const winner = names[Math.floor(Math.random() * names.length)];
+
+        // สร้างแถบรีลยาวๆ: ชื่อสุ่มซ้ำหลายรอบเพื่อให้ไหลนานๆ แล้วจบที่ผู้ชนะ
+        const REELS = 28; // จำนวนชื่อที่ไหลผ่านก่อนหยุด
+        let reel = [];
+        for (let i = 0; i < REELS; i++) {
+            reel.push(names[Math.floor(Math.random() * names.length)]);
+        }
+        // ตำแหน่งล็อก: ผู้ชนะต้องอยู่ "ช่องกลาง" ตอนหยุด
+        // index ผู้ชนะในรีล = REELS (ต่อท้าย) ; ช่องกลาง = index - 1 (เพราะกลางคือช่องที่ 2 ใน 3)
+        reel.push(names[Math.floor(Math.random() * names.length)]); // ช่องบนของกรอบสุดท้าย
+        reel.push(winner);                                          // ★ ช่องกลาง = ผู้ชนะ
+        reel.push(names[Math.floor(Math.random() * names.length)]); // ช่องล่าง
+        const winnerItemIndex = reel.length - 2; // ตำแหน่งผู้ชนะในอาเรย์
+
+        const reelHtml = reel.map(n =>
+            `<div class="slot-item">${escHtml(n.length > 16 ? n.slice(0,15)+'…' : n)}</div>`
+        ).join('');
+
+        display.innerHTML = `
+            <div class="slot-stage">
+                <div class="slot-machine">
+                    <div class="slot-title">🎰 J A C K P O T 🎰</div>
+                    <div class="slot-window">
+                        <div class="slot-fade top"></div>
+                        <div class="slot-fade bottom"></div>
+                        <div class="slot-line"></div>
+                        <div class="slot-reel" id="slotReel">${reelHtml}</div>
+                    </div>
+                </div>
+                <div id="slotStatus" style="margin-top:14px;color:#ffd32a;font-weight:800;font-size:1.3rem;">กำลังหมุน... 🎰</div>
+            </div>`;
+
+        const reelEl = document.getElementById('slotReel');
+        // ระยะเลื่อนสุดท้าย: ให้ winnerItemIndex มาอยู่ช่องกลาง
+        // ช่องกลางคือแถวที่ 2 (index 1) ในกรอบ → offset = (winnerItemIndex - 1) * ITEM_H
+        const finalY = (winnerItemIndex - 1) * ITEM_H;
+
+        // แอนิเมชันแบบ JS: เริ่มเร็ว แล้วชะลอ (ease-out) + เสียง tick ตามชื่อที่ผ่าน
+        const duration = 4200;
+        const startTime = performance.now();
+        let lastTickRow = -1;
+
+        function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+
+        function frame(now) {
+            const elapsed = now - startTime;
+            let t = Math.min(elapsed / duration, 1);
+            const eased = easeOutQuart(t);
+            const y = eased * finalY;
+            reelEl.style.transform = `translateY(${-y}px)`;
+
+            // เล่นเสียง tick ทุกครั้งที่เลื่อนผ่านชื่อใหม่
+            const row = Math.floor(y / ITEM_H);
+            if (row !== lastTickRow) { tickSound(); lastTickRow = row; }
+
+            if (t < 1) {
+                requestAnimationFrame(frame);
+            } else {
+                reelEl.style.transform = `translateY(${-finalY}px)`;
+                lockSlot(winner, names);
             }
+        }
+        requestAnimationFrame(frame);
+    }
 
-            html += `<button class="btn-game btn-score" onclick="giveScore('${winner}', this)">⭐ +1 คะแนนให้ ${winner}</button>`;
-            display.innerHTML = html;
+    function lockSlot(winner, names) {
+        isSpinning = false;
+        // ไฮไลต์ช่องกลาง + เสียงดีดล็อก
+        const reelEl = document.getElementById('slotReel');
+        if (reelEl) {
+            const items = reelEl.querySelectorAll('.slot-item');
+            // ช่องกลาง = item ที่ตำแหน่ง (reel.length - 2) → ตัวก่อนสุดท้าย -1
+            const centerIdx = items.length - 2;
+            if (items[centerIdx]) items[centerIdx].classList.add('center-win');
+            reelEl.parentElement.classList.add('slot-locked');
+        }
+        beep(1200, 0.08, 'square', 0.12);
+        const status = document.getElementById('slotStatus');
+        if (status) status.innerHTML = '🎉 JACKPOT! 🎉';
 
-            let currentNames = getNames().filter(n => n !== winner);
-            document.getElementById('nameList').value = currentNames.join('\n');
-            updateStats(); // ✅ อัปเดต stats หลังสุ่ม
+        // หน่วงนิดให้เห็นช่องล็อกก่อนเด้งผลเต็ม
+        setTimeout(() => revealWinner(winner, names), 650);
+    }
 
-        } else if (mode === 'pair') {
-            document.getElementById('tadaSound').play();
+    function revealWinner(winner, names) {
+        const display = document.getElementById('resultDisplay');
+        winSound();
+        confetti({ particleCount: 220, spread: 110, origin: { y: 0.6 } });
+
+        let html = `<span style="font-size:1.4rem;color:#ffd32a;font-weight:bold;">🎉 LUCKY WINNER 🎉</span><br>
+                    <img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(winner)}&backgroundColor=b6e3f4">
+                    <div class="winner-name">${winner}</div>`;
+
+        if (document.getElementById('challengeMode').checked) {
+            const room = document.getElementById('savedRooms').value;
+            let tasks = allChallenges[room];
+            let task = "⚠️ ยังไม่ได้เพิ่มโจทย์สำหรับห้องนี้ในชีต Challenges";
+            if (tasks && tasks.length > 0) task = tasks[Math.floor(Math.random()*tasks.length)];
+            html += `<div class="challenge-box">🔥 ภารกิจ: ${task}</div>`;
+        }
+        html += `<button class="btn-game btn-score" onclick="giveScore('${winner.replace(/'/g,"\\'")}', this)">⭐ +1 คะแนนให้ ${winner}</button>`;
+        display.innerHTML = html;
+
+        addHistory(winner);
+
+        // โหมดไม่ซ้ำ: เอาผู้ชนะออกจากรายชื่อ
+        if (document.getElementById('noRepeatMode').checked) {
+            const remain = getNames().filter(n => n !== winner);
+            document.getElementById('nameList').value = remain.join('\n');
+        }
+        updateStats();
+    }
+
+    function quickShuffleAnim(mode, names) {
+        isSpinning = true;
+        const display = document.getElementById('resultDisplay');
+        display.classList.add('animate-shake');
+        let interval = setInterval(() => {
+            const t = names[Math.floor(Math.random()*names.length)];
+            tickSound();
+            display.innerHTML = `<img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(t)}&backgroundColor=b6e3f4">
+                                 <div class="winner-name" style="font-size:3rem;">${t}</div>`;
+        }, 70);
+        setTimeout(() => {
+            clearInterval(interval);
+            display.classList.remove('animate-shake');
+            isSpinning = false;
+            showGroupResult(mode, names, display);
+        }, 1800);
+    }
+
+    function showGroupResult(mode, names, display) {
+        const shuffled = shuffle([...names]);
+        winSound();
+        if (mode === 'pair') {
             let html = '<div class="result-list"><strong style="color:#ffd32a;font-size:1.5rem;">👥 จับคู่ลุยงาน:</strong><br>';
-            for (let i = 0; i < shuffled.length; i += 2) {
-                const p1 = shuffled[i];
-                const p2 = shuffled[i+1] ? shuffled[i+1] : '<span style="color:#ff4757;">(ไม่มีคู่/เหงาๆ)</span>';
+            for (let i=0;i<shuffled.length;i+=2){
+                const p1=shuffled[i], p2=shuffled[i+1]?shuffled[i+1]:'<span style="color:#ff4757;">(ไม่มีคู่/เหงาๆ)</span>';
                 html += `<div class="group-item">${p1} <span style="font-size:1.5rem;">🤝</span> ${p2}</div>`;
             }
             html += '</div>'; display.innerHTML = html;
-
         } else if (mode === 'group') {
-            document.getElementById('tadaSound').play();
             const size = parseInt(document.getElementById('groupSize').value);
-            if (isNaN(size) || size < 2) return alert('ระบุขนาดกลุ่มให้ถูกต้อง');
+            if (isNaN(size)||size<2) return alert('ระบุขนาดกลุ่มให้ถูกต้อง');
             let html = `<div class="result-list"><strong style="color:#ffd32a;font-size:1.5rem;">📦 จัดกลุ่ม (กลุ่มละ ${size} คน):</strong><br>`;
-            let gNum = 1;
-            for (let i = 0; i < shuffled.length; i += size) {
-                html += `<div class="group-item"><strong style="color:#2ed573;">ทีมที่ ${gNum}:</strong> ${shuffled.slice(i, i+size).join(', ')}</div>`;
-                gNum++;
+            let g=1;
+            for (let i=0;i<shuffled.length;i+=size){
+                html += `<div class="group-item"><strong style="color:#2ed573;">ทีมที่ ${g}:</strong> ${shuffled.slice(i,i+size).join(', ')}</div>`; g++;
             }
             html += '</div>'; display.innerHTML = html;
         }
     }
 
-    async function giveScore(studentName, btnElement) {
+    async function giveScore(studentName, btn) {
         const room = document.getElementById('savedRooms').value || 'ไม่ได้ระบุห้อง';
-        btnElement.innerHTML = '⏳ กำลังส่งข้อมูล...';
-        btnElement.style.backgroundColor = '#747d8c';
-        btnElement.style.boxShadow = '0 0px 0 #57606f';
-        btnElement.disabled = true;
+        ensureAudio(); scoreSound();
+        btn.innerHTML = '⏳ กำลังส่งข้อมูล...';
+        btn.style.backgroundColor = '#747d8c'; btn.style.boxShadow = '0 0px 0 #57606f'; btn.disabled = true;
         try {
             const url = GAS_API_URL + "?action=recordScore&room=" + encodeURIComponent(room) + "&name=" + encodeURIComponent(studentName);
-            const response = await fetch(url);
-            const result = await response.json();
-            btnElement.innerHTML = result.message;
-            btnElement.style.backgroundColor = '#2ed573';
-            btnElement.style.boxShadow = '0 6px 0 #27ae60';
+            const res = await fetch(url);
+            const result = await res.json();
+            btn.innerHTML = result.message;
+            btn.style.backgroundColor = '#2ed573'; btn.style.boxShadow = '0 6px 0 #27ae60';
             confetti({ particleCount: 50, spread: 40, origin: { y: 0.8 } });
-        } catch (error) {
-            btnElement.innerHTML = '❌ บันทึกไม่สำเร็จ';
-            btnElement.style.backgroundColor = '#ff4757';
-            btnElement.disabled = false;
+        } catch (e) {
+            btn.innerHTML = '❌ บันทึกไม่สำเร็จ';
+            btn.style.backgroundColor = '#ff4757'; btn.disabled = false;
         }
     }
 </script>
