@@ -29,21 +29,29 @@
             min-height: 100vh; display: flex; justify-content: center; align-items: flex-start;
             color: var(--light); overflow-x: hidden; transition: background-color 0.5s;
         }
-        .fullscreen-btn {
-            position: fixed; top: 20px; right: 20px; background: rgba(255,255,255,0.1);
-            border: 2px solid rgba(255,255,255,0.3); color: white; font-size: 1.5rem;
-            padding: 10px 15px; border-radius: 12px; cursor: pointer; z-index: 1000; transition: 0.3s; backdrop-filter: blur(5px);
+        .top-controls { position: fixed; top: 18px; right: 18px; z-index: 1000; display: flex; gap: 8px; }
+        .fs-btn {
+            background: rgba(255,255,255,0.14); border: 2px solid rgba(255,255,255,0.35); color: white; font-size: 1.3rem;
+            width: 48px; height: 48px; border-radius: 14px; cursor: pointer; transition: 0.25s; backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
         }
-        .fullscreen-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.1); }
+        .fs-btn:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
+        .fs-btn.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 16px var(--accent); }
         .container {
-            background: rgba(18,18,30,0.82); padding: 30px; border-radius: 28px;
+            background: rgba(18,18,30,0.82); padding: 32px; border-radius: 28px;
             box-shadow: 0 25px 60px rgba(40,30,90,0.4), 0 0 0 1px rgba(255,255,255,0.08), inset 0 0 0 2px rgba(255,255,255,0.06);
             max-width: 1100px; width: 100%; text-align: center; backdrop-filter: blur(18px);
+            transition: max-width 0.45s ease;
         }
+        .header-wrap { margin-bottom: 18px; }
         h1 {
-            font-size: 2.8rem; margin-bottom: 10px; margin-top: 0; font-weight: 900; letter-spacing: 2px;
-            background: linear-gradient(to right, var(--primary), var(--warning)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-size: 2.9rem; margin: 0 0 4px; font-weight: 900; letter-spacing: 1px; line-height: 1.1;
+            background: linear-gradient(110deg, var(--primary) 0%, var(--warning) 45%, var(--accent) 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 10px rgba(0,0,0,0.35));
         }
+        h1 .h1-accent { -webkit-text-fill-color: transparent; }
+        .subtitle { margin: 0; color: rgba(255,255,255,0.5); font-size: 0.92rem; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; }
 
         /* ── THEME SWITCHER ── */
         .theme-bar { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
@@ -202,6 +210,68 @@
 
         .animate-shake { animation: screenShake 0.1s infinite alternate; }
         @keyframes screenShake { from { transform: translate(-2px,1px); filter: brightness(1.2); } to { transform: translate(2px,-1px); filter: brightness(0.8); } }
+
+        /* ── FOCUS MODE (ซ่อนแผงซ้าย เหลือเวที) ── */
+        body.focus-mode .input-section { display: none; }
+        body.focus-mode .container { max-width: 820px; }
+        body.focus-mode .result-section { flex: 1; min-width: auto; }
+        body.focus-mode .result-box { min-height: 60vh; }
+        .focus-hint {
+            position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.6); color: rgba(255,255,255,0.85); padding: 7px 18px; border-radius: 20px;
+            font-size: 0.82rem; font-weight: 600; z-index: 1000; backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.15); display: none; gap: 14px; align-items: center;
+        }
+        body.focus-mode .focus-hint { display: flex; }
+        .focus-hint kbd { background: rgba(255,255,255,0.15); border-radius: 5px; padding: 1px 7px; font-family: monospace; font-weight: 700; }
+
+        /* ── WINNER SPOTLIGHT (อลังการ) ── */
+        .winner-card {
+            position: relative; display: flex; flex-direction: column; align-items: center;
+            padding: 12px 8px; border-radius: 22px; animation: winnerPop 0.6s cubic-bezier(0.2,1.3,0.4,1);
+        }
+        @keyframes winnerPop { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.06); } 100% { transform: scale(1); opacity: 1; } }
+        .avatar-halo { position: relative; width: 150px; height: 150px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; }
+        .avatar-halo::before {
+            content: ''; position: absolute; inset: -14px; border-radius: 50%;
+            background: conic-gradient(var(--primary), var(--warning), var(--accent), var(--secondary), var(--primary));
+            animation: haloSpin 3s linear infinite; filter: blur(3px); opacity: 0.85;
+        }
+        @keyframes haloSpin { to { transform: rotate(360deg); } }
+        .avatar-halo .avatar { position: relative; margin: 0; width: 130px; height: 130px; z-index: 1; }
+        .winner-badge {
+            display: inline-block; background: linear-gradient(90deg, var(--warning), var(--primary));
+            color: #fff; font-weight: 800; font-size: 0.95rem; letter-spacing: 2px; text-transform: uppercase;
+            padding: 5px 18px; border-radius: 20px; margin-bottom: 4px; box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+        }
+
+        /* ── LOADING SKELETON / SPINNER ── */
+        .loader-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+        .spinner-ring { width: 64px; height: 64px; border-radius: 50%; border: 6px solid rgba(255,255,255,0.12); border-top-color: var(--warning); animation: ringSpin 0.9s linear infinite; }
+        @keyframes ringSpin { to { transform: rotate(360deg); } }
+        .loader-text { color: rgba(255,255,255,0.7); font-size: 1.2rem; font-weight: 600; }
+        .skeleton-bar { width: 220px; height: 14px; border-radius: 8px; background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0.06) 75%); background-size: 200% 100%; animation: shimmer 1.3s infinite; }
+        @keyframes shimmer { to { background-position: -200% 0; } }
+
+        /* ── UNDO BAR ── */
+        .undo-bar {
+            display: none; align-items: center; justify-content: space-between; gap: 10px;
+            background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.12); border-radius: 14px;
+            padding: 8px 14px; font-size: 0.9rem; animation: bounceIn 0.4s;
+        }
+        .undo-bar.show { display: flex; }
+        .undo-bar .undo-txt { color: rgba(255,255,255,0.75); font-weight: 600; }
+        .undo-bar .undo-txt b { color: var(--warning); }
+        .undo-btn { background: var(--secondary); color: #fff; border: none; border-radius: 10px; padding: 7px 14px; font-family: 'Kanit', sans-serif; font-weight: 800; cursor: pointer; box-shadow: 0 4px 0 var(--secondary-dark); transition: 0.1s; }
+        .undo-btn:active { box-shadow: 0 0 0 var(--secondary-dark); transform: translateY(4px); }
+
+        /* ── HISTORY EXPORT BTN ── */
+        .history-export { background: rgba(30,144,255,0.2); border: 1px solid var(--secondary); color: #74b9ff; border-radius: 8px; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; font-family: 'Kanit', sans-serif; font-weight: 600; margin-right: 6px; }
+
+        @media (max-width: 600px) {
+            .container { padding: 20px; } h1 { font-size: 2.1rem; }
+            .avatar-halo { width: 120px; height: 120px; } .avatar-halo .avatar { width: 105px; height: 105px; }
+        }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 10px; }
@@ -209,10 +279,16 @@
 </head>
 <body onload="applyTheme('arcade'); loadAppData()">
 
-<button class="fullscreen-btn" onclick="toggleFullScreen()" title="เต็มหน้าจอ">🔲</button>
+<div class="top-controls">
+    <button class="fs-btn" onclick="toggleFocus()" id="focusBtn" title="โหมดโฟกัส (ซ่อนแผงควบคุม)">🎯</button>
+    <button class="fs-btn" onclick="toggleFullScreen()" title="เต็มหน้าจอ">🔲</button>
+</div>
 
-<div class="container">
-    <h1>🎰 𝐋𝐔𝐂𝐊𝐘 𝐃𝐑𝐀𝐖 𝐀𝐑𝐂𝐀𝐃𝐄 🎯</h1>
+<div class="container" id="appContainer">
+    <div class="header-wrap">
+        <h1>🎰 LUCKY DRAW <span class="h1-accent">ARCADE</span> 🎯</h1>
+        <p class="subtitle">ระบบสุ่มรายชื่อนักเรียน · by Tr. Oat</p>
+    </div>
 
     <div class="theme-bar">
         <span class="theme-label">🎨 ธีม:</span>
@@ -270,10 +346,18 @@
                 <span style="font-weight:bold;color:white;">คน</span>
             </div>
 
+            <div class="undo-bar" id="undoBar">
+                <span class="undo-txt">เพิ่งสุ่ม <b id="undoName">—</b> ออกไป</span>
+                <button class="undo-btn" onclick="undoLastDraw()">↩️ เอากลับ</button>
+            </div>
+
             <div class="history-panel">
                 <div class="history-head">
                     <strong>📜 ประวัติการสุ่ม (<span id="historyCount">0</span>)</strong>
-                    <button class="history-clear" onclick="clearHistory()">🗑️ ล้าง</button>
+                    <div>
+                        <button class="history-export" onclick="exportHistory(event)">📋 คัดลอก</button>
+                        <button class="history-clear" onclick="clearHistory()">🗑️ ล้าง</button>
+                    </div>
                 </div>
                 <div class="history-list" id="historyList">
                     <span class="history-empty">ยังไม่มีประวัติการสุ่ม</span>
@@ -289,6 +373,12 @@
     </div>
 </div>
 
+<div class="focus-hint">
+    <span><kbd>Space</kbd> สุ่ม 1 คน</span>
+    <span><kbd>Esc</kbd> ออกจากโฟกัส</span>
+    <span><kbd>R</kbd> รีเซ็ต</span>
+</div>
+
 <script>
     // ==========================================
     // ✅ GAS Web App URL (เหมือนเดิม)
@@ -300,6 +390,7 @@
     let totalInRoom   = 0;
     let drawHistory   = [];   // เก็บประวัติคนที่ถูกสุ่ม
     let isSpinning    = false;
+    let lastDraw      = null;  // สำหรับ undo การสุ่มล่าสุด
 
     // ==========================================
     // 🔊 WEB AUDIO (สร้างเสียงเองในเบราว์เซอร์ — ไม่ต้องโหลดไฟล์)
@@ -418,11 +509,39 @@
         else if (document.exitFullscreen) document.exitFullscreen();
     }
 
+    // ── โหมดโฟกัส (ซ่อนแผงควบคุม เหลือเวที) ──
+    function toggleFocus() {
+        const on = document.body.classList.toggle('focus-mode');
+        document.getElementById('focusBtn').classList.toggle('active', on);
+        ensureAudio(); beep(on ? 700 : 500, 0.07, 'sine', 0.07);
+    }
+
+    // ── คีย์ลัด: Space=สุ่ม, Esc=ออกโฟกัส, R=รีเซ็ต ──
+    document.addEventListener('keydown', (e) => {
+        const tag = (e.target.tagName || '').toLowerCase();
+        if (tag === 'textarea' || tag === 'input' || tag === 'select') return; // ไม่ขัดการพิมพ์
+        if (e.code === 'Space') {
+            e.preventDefault();
+            if (!isSpinning) startRandom('single');
+        } else if (e.code === 'Escape') {
+            if (document.body.classList.contains('focus-mode')) toggleFocus();
+        } else if (e.key === 'r' || e.key === 'R' || e.key === 'ก') {
+            resetRoom();
+        }
+    });
+
     async function loadAppData() {
         if (!GAS_API_URL || GAS_API_URL === "YOUR_WEB_APP_URL_HERE") {
             document.getElementById('resultDisplay').innerHTML = '<span style="color:#ff4757;font-size:1.5rem;">⚠️ กรุณาใส่ GAS Web App URL ในโค้ดก่อนครับ</span>';
             return;
         }
+        document.getElementById('resultDisplay').innerHTML =
+            `<div class="loader-wrap">
+                <div class="spinner-ring"></div>
+                <div class="loader-text">กำลังเชื่อมต่อฐานข้อมูล...</div>
+                <div class="skeleton-bar"></div>
+                <div class="skeleton-bar" style="width:160px;"></div>
+             </div>`;
         try {
             const response = await fetch(GAS_API_URL + "?action=getAppData");
             const data = await response.json();
@@ -453,6 +572,7 @@
         const room = document.getElementById('savedRooms').value;
         const ta = document.getElementById('nameList');
         clearHistory();
+        hideUndoBar(); lastDraw = null;
         if (room && allClassrooms[room]) {
             ta.value = allClassrooms[room].join('\n');
             totalInRoom = allClassrooms[room].length;
@@ -467,6 +587,7 @@
             document.getElementById('nameList').value = allClassrooms[room].join('\n');
             totalInRoom = allClassrooms[room].length;
             clearHistory();
+            hideUndoBar(); lastDraw = null;
             updateStats();
             document.getElementById('resultDisplay').innerHTML = '<span style="color:#ffa502;">🔄 รีเซ็ตรายชื่อครบแล้ว!</span>';
         } else { alert('กรุณาเลือกห้องเรียนก่อนครับ!'); }
@@ -512,11 +633,12 @@
             reel.push(names[Math.floor(Math.random() * names.length)]);
         }
         // ตำแหน่งล็อก: ผู้ชนะต้องอยู่ "ช่องกลาง" ตอนหยุด
-        // index ผู้ชนะในรีล = REELS (ต่อท้าย) ; ช่องกลาง = index - 1 (เพราะกลางคือช่องที่ 2 ใน 3)
         reel.push(names[Math.floor(Math.random() * names.length)]); // ช่องบนของกรอบสุดท้าย
         reel.push(winner);                                          // ★ ช่องกลาง = ผู้ชนะ
+        const winnerItemIndex = reel.length - 1;                    // ตำแหน่งผู้ชนะในอาเรย์
         reel.push(names[Math.floor(Math.random() * names.length)]); // ช่องล่าง
-        const winnerItemIndex = reel.length - 2; // ตำแหน่งผู้ชนะในอาเรย์
+        // buffer ท้ายรองรับการดีดกลับ (overshoot) ไม่ให้เห็นช่องว่าง
+        for (let k = 0; k < 4; k++) reel.push(names[Math.floor(Math.random() * names.length)]);
 
         const reelHtml = reel.map(n =>
             `<div class="slot-item">${escHtml(n.length > 16 ? n.slice(0,15)+'…' : n)}</div>`
@@ -541,43 +663,45 @@
         // ช่องกลางคือแถวที่ 2 (index 1) ในกรอบ → offset = (winnerItemIndex - 1) * ITEM_H
         const finalY = (winnerItemIndex - 1) * ITEM_H;
 
-        // แอนิเมชันแบบ JS: เริ่มเร็ว แล้วชะลอ (ease-out) + เสียง tick ตามชื่อที่ผ่าน
+        // แอนิเมชันแบบ JS: เริ่มเร็ว ชะลอลง แล้ว "ดีดเลยเด้งกลับ" (overshoot) เหมือนตู้จริง
         const duration = 4200;
         const startTime = performance.now();
         let lastTickRow = -1;
 
-        function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+        // easeOutBack: ดีดเลยปลายทางเล็กน้อยแล้วเด้งกลับ (ลดความแรงให้ดีดแค่ ~นิดเดียว)
+        function easeOutBack(t) {
+            const c1 = 0.8, c3 = c1 + 1;  // c1 ต่ำ = ดีดเลยน้อย ดูเนียน
+            return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+        }
 
         function frame(now) {
             const elapsed = now - startTime;
             let t = Math.min(elapsed / duration, 1);
-            const eased = easeOutQuart(t);
+            const eased = easeOutBack(t);
             const y = eased * finalY;
             reelEl.style.transform = `translateY(${-y}px)`;
 
-            // เล่นเสียง tick ทุกครั้งที่เลื่อนผ่านชื่อใหม่
-            const row = Math.floor(y / ITEM_H);
+            // เล่นเสียง tick ทุกครั้งที่เลื่อนผ่านชื่อใหม่ (เฉพาะตอนเลื่อนไปข้างหน้า)
+            const row = Math.floor(Math.abs(y) / ITEM_H);
             if (row !== lastTickRow) { tickSound(); lastTickRow = row; }
 
             if (t < 1) {
                 requestAnimationFrame(frame);
             } else {
                 reelEl.style.transform = `translateY(${-finalY}px)`;
-                lockSlot(winner, names);
+                lockSlot(winner, names, winnerItemIndex);
             }
         }
         requestAnimationFrame(frame);
     }
 
-    function lockSlot(winner, names) {
+    function lockSlot(winner, names, winnerItemIndex) {
         isSpinning = false;
-        // ไฮไลต์ช่องกลาง + เสียงดีดล็อก
+        // ไฮไลต์ช่องผู้ชนะ + เสียงดีดล็อก
         const reelEl = document.getElementById('slotReel');
         if (reelEl) {
             const items = reelEl.querySelectorAll('.slot-item');
-            // ช่องกลาง = item ที่ตำแหน่ง (reel.length - 2) → ตัวก่อนสุดท้าย -1
-            const centerIdx = items.length - 2;
-            if (items[centerIdx]) items[centerIdx].classList.add('center-win');
+            if (items[winnerItemIndex]) items[winnerItemIndex].classList.add('center-win');
             reelEl.parentElement.classList.add('slot-locked');
         }
         beep(1200, 0.08, 'square', 0.12);
@@ -585,36 +709,95 @@
         if (status) status.innerHTML = '🎉 JACKPOT! 🎉';
 
         // หน่วงนิดให้เห็นช่องล็อกก่อนเด้งผลเต็ม
-        setTimeout(() => revealWinner(winner, names), 650);
+        setTimeout(() => revealWinner(winner, names), 700);
     }
 
     function revealWinner(winner, names) {
         const display = document.getElementById('resultDisplay');
         winSound();
         confetti({ particleCount: 220, spread: 110, origin: { y: 0.6 } });
+        setTimeout(() => confetti({ particleCount: 80, angle: 60, spread: 70, origin: { x: 0 } }), 200);
+        setTimeout(() => confetti({ particleCount: 80, angle: 120, spread: 70, origin: { x: 1 } }), 200);
 
-        let html = `<span style="font-size:1.4rem;color:#ffd32a;font-weight:bold;">🎉 LUCKY WINNER 🎉</span><br>
-                    <img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(winner)}&backgroundColor=b6e3f4">
-                    <div class="winner-name">${winner}</div>`;
+        const order = drawHistory.length + 1;
+        let html = `<div class="winner-card">
+                        <span class="winner-badge">🏆 Winner #${order}</span>
+                        <div class="avatar-halo">
+                            <img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(winner)}&backgroundColor=b6e3f4">
+                        </div>
+                        <div class="winner-name">${escHtml(winner)}</div>`;
 
         if (document.getElementById('challengeMode').checked) {
             const room = document.getElementById('savedRooms').value;
             let tasks = allChallenges[room];
             let task = "⚠️ ยังไม่ได้เพิ่มโจทย์สำหรับห้องนี้ในชีต Challenges";
             if (tasks && tasks.length > 0) task = tasks[Math.floor(Math.random()*tasks.length)];
-            html += `<div class="challenge-box">🔥 ภารกิจ: ${task}</div>`;
+            html += `<div class="challenge-box">🔥 ภารกิจ: ${escHtml(task)}</div>`;
         }
-        html += `<button class="btn-game btn-score" onclick="giveScore('${winner.replace(/'/g,"\\'")}', this)">⭐ +1 คะแนนให้ ${winner}</button>`;
+        html += `<button class="btn-game btn-score" onclick="giveScore('${winner.replace(/'/g,"\\'")}', this)">⭐ +1 คะแนนให้ ${escHtml(winner)}</button>
+                 </div>`;
         display.innerHTML = html;
 
         addHistory(winner);
 
-        // โหมดไม่ซ้ำ: เอาผู้ชนะออกจากรายชื่อ
+        // โหมดไม่ซ้ำ: เอาผู้ชนะออกจากรายชื่อ + เก็บ state ไว้ undo
         if (document.getElementById('noRepeatMode').checked) {
-            const remain = getNames().filter(n => n !== winner);
+            const before = getNames();
+            const remain = before.filter(n => n !== winner);
             document.getElementById('nameList').value = remain.join('\n');
+            lastDraw = { name: winner, removed: true };
+        } else {
+            lastDraw = { name: winner, removed: false };
         }
+        showUndoBar(winner);
         updateStats();
+    }
+
+    // ── UNDO ──
+    function showUndoBar(name) {
+        const bar = document.getElementById('undoBar');
+        document.getElementById('undoName').textContent = name;
+        bar.classList.add('show');
+    }
+    function hideUndoBar() { document.getElementById('undoBar').classList.remove('show'); }
+    function undoLastDraw() {
+        if (!lastDraw) return;
+        // คืนชื่อกลับเข้า list (ถ้าถูกเอาออก)
+        if (lastDraw.removed) {
+            const cur = getNames();
+            if (!cur.includes(lastDraw.name)) {
+                cur.push(lastDraw.name);
+                document.getElementById('nameList').value = cur.join('\n');
+            }
+        }
+        // เอาออกจากประวัติ (ตัวล่าสุด)
+        const idx = drawHistory.lastIndexOf(lastDraw.name);
+        if (idx !== -1) drawHistory.splice(idx, 1);
+        renderHistory();
+        updateStats();
+        hideUndoBar();
+        ensureAudio(); beep(440, 0.1, 'sine', 0.08);
+        document.getElementById('resultDisplay').innerHTML = '<span style="color:#1e90ff;font-size:2.2rem;font-weight:800;">↩️ ดึงกลับแล้ว<br>PRESS START 🎰</span>';
+        lastDraw = null;
+    }
+
+    // ── EXPORT ประวัติ ──
+    function exportHistory(ev) {
+        if (drawHistory.length === 0) { alert('ยังไม่มีประวัติให้คัดลอกครับ'); return; }
+        const room = document.getElementById('savedRooms').value || '';
+        const date = new Date().toLocaleString('th-TH');
+        const text = `ประวัติการสุ่ม ${room} (${date})\n` +
+                     drawHistory.map((n, i) => `${i+1}. ${n}`).join('\n');
+        const btn = (ev && ev.target) ? ev.target : null;
+        navigator.clipboard.writeText(text).then(() => {
+            if (btn) {
+                const old = btn.textContent;
+                btn.textContent = '✅ คัดลอกแล้ว';
+                setTimeout(() => btn.textContent = old, 1500);
+            }
+        }).catch(() => {
+            prompt('คัดลอกข้อความนี้:', text);
+        });
     }
 
     function quickShuffleAnim(mode, names) {
