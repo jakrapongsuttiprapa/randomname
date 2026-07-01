@@ -142,7 +142,7 @@
         /* ── RESULT / STAGE ── */
         .result-box {
             background: linear-gradient(180deg,rgba(30,39,46,0.9) 0%,rgba(11,23,42,0.9) 100%);
-            border: 4px solid var(--secondary); border-radius: 20px; min-height: 480px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            border: 4px solid var(--secondary); border-radius: 20px; min-height: 520px; display: flex; flex-direction: column; justify-content: center; align-items: center;
             box-shadow: 0 0 30px rgba(30,144,255,0.3), inset 0 0 20px rgba(0,0,0,0.8); position: relative; overflow: hidden; padding: 30px;
         }
         .avatar { width: 130px; height: 130px; background: white; border-radius: 50%; padding: 5px; margin-bottom: 12px; border: 5px solid var(--warning); box-shadow: 0 0 25px var(--warning); }
@@ -151,52 +151,6 @@
         .result-list { font-size: 1.25rem; text-align: left; width: 100%; max-height: 420px; overflow-y: auto; }
         .group-item { background: rgba(255,255,255,0.1); margin: 9px 0; padding: 12px; border-radius: 10px; border-left: 6px solid var(--warning); }
         @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); opacity:1; } 100% { transform: scale(1); } }
-
-        /* ── SLOT MACHINE ── */
-        .slot-stage { display: flex; flex-direction: column; align-items: center; width: 100%; }
-        .slot-machine {
-            background: linear-gradient(160deg, #2c2c3a 0%, #15151e 100%);
-            border-radius: 22px; padding: 22px 26px 18px;
-            box-shadow: 0 0 0 6px var(--warning), 0 0 35px rgba(0,0,0,0.7), inset 0 0 20px rgba(0,0,0,0.6);
-            position: relative; max-width: 92%;
-        }
-        .slot-machine::before, .slot-machine::after {
-            content: ''; position: absolute; top: 50%; transform: translateY(-50%);
-            width: 16px; height: 16px; border-radius: 50%; background: var(--primary);
-            box-shadow: 0 0 12px var(--primary); animation: bulbBlink 0.6s infinite alternate;
-        }
-        .slot-machine::before { left: 6px; } .slot-machine::after { right: 6px; }
-        @keyframes bulbBlink { from { opacity: 0.3; } to { opacity: 1; } }
-        .slot-title { color: var(--warning); font-weight: 900; font-size: 1.1rem; letter-spacing: 2px; margin-bottom: 12px; text-shadow: 0 0 8px var(--warning); }
-        .slot-window {
-            position: relative; width: 300px; max-width: 78vw; height: 150px; overflow: hidden;
-            background: #0a0a12; border-radius: 14px;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.9), inset 0 8px 12px rgba(0,0,0,0.8), inset 0 -8px 12px rgba(0,0,0,0.8);
-            border: 3px solid rgba(255,255,255,0.1);
-        }
-        .slot-reel { position: absolute; top: 0; left: 0; width: 100%; will-change: transform; }
-        .slot-item {
-            height: 50px; display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; font-weight: 800; color: #fff; white-space: nowrap;
-            padding: 0 8px; overflow: hidden; text-overflow: ellipsis;
-        }
-        /* แถบไฮไลต์ช่องกลาง (ช่องที่ล็อก) */
-        .slot-line {
-            position: absolute; top: 50px; left: 0; width: 100%; height: 50px; z-index: 3; pointer-events: none;
-            border-top: 3px solid var(--warning); border-bottom: 3px solid var(--warning);
-            box-shadow: 0 0 18px var(--warning), inset 0 0 18px rgba(255,165,2,0.25);
-        }
-        .slot-line::before, .slot-line::after {
-            content: '▶'; position: absolute; top: 50%; transform: translateY(-50%);
-            color: var(--warning); font-size: 1.2rem; text-shadow: 0 0 8px var(--warning);
-        }
-        .slot-line::before { left: -2px; } .slot-line::after { right: -2px; content: '◀'; }
-        /* เงาบน-ล่างให้ดูเหมือนกระจกโค้ง */
-        .slot-fade { position: absolute; left:0; width:100%; height:50px; z-index:2; pointer-events:none; }
-        .slot-fade.top    { top:0;    background: linear-gradient(to bottom, #0a0a12, transparent); }
-        .slot-fade.bottom { bottom:0; background: linear-gradient(to top, #0a0a12, transparent); }
-        .slot-locked .slot-item.center-win { color: var(--warning); text-shadow: 0 0 12px var(--warning); animation: winPulse 0.5s ease infinite alternate; }
-        @keyframes winPulse { from { transform: scale(1); } to { transform: scale(1.12); } }
 
         /* ── HISTORY PANEL ── */
         .history-panel { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 14px; text-align: left; }
@@ -277,7 +231,7 @@
         ::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 10px; }
     </style>
 </head>
-<body onload="applyTheme('arcade'); loadAppData()">
+<body onload="applyTheme('sunset'); loadAppData()">
 
 <div class="top-controls">
     <button class="fs-btn" onclick="toggleFocus()" id="focusBtn" title="โหมดโฟกัส (ซ่อนแผงควบคุม)">🎯</button>
@@ -292,9 +246,9 @@
 
     <div class="theme-bar">
         <span class="theme-label">🎨 ธีม:</span>
-        <div class="theme-btn active" data-theme="arcade"   title="Arcade"   onclick="applyTheme('arcade')"></div>
+        <div class="theme-btn"        data-theme="arcade"   title="Arcade"   onclick="applyTheme('arcade')"></div>
         <div class="theme-btn"        data-theme="ocean"    title="Ocean"    onclick="applyTheme('ocean')"></div>
-        <div class="theme-btn"        data-theme="sunset"   title="Sunset"   onclick="applyTheme('sunset')"></div>
+        <div class="theme-btn active" data-theme="sunset"   title="Sunset"   onclick="applyTheme('sunset')"></div>
         <div class="theme-btn"        data-theme="forest"   title="Forest"   onclick="applyTheme('forest')"></div>
         <div class="theme-btn"        data-theme="midnight" title="Midnight" onclick="applyTheme('midnight')"></div>
         <div class="theme-btn"        data-theme="casino"   title="Casino Gold" onclick="applyTheme('casino')"></div>
@@ -603,113 +557,37 @@
         ensureAudio();
 
         if (mode === 'single') {
-            spinSlot(names);
+            quickShuffleSingle(names);
         } else {
-            // pair / group ใช้แอนิเมชันสั่นจอแบบเดิม (เร็ว เหมาะกับหลายชื่อ)
+            // pair / group ใช้แอนิเมชันสั่นจอแบบเดียวกัน (เร็ว เหมาะกับหลายชื่อ)
             quickShuffleAnim(mode, names);
         }
     }
-
-    // ==========================================
-    // 🎰 SLOT MACHINE
-    // ==========================================
-    const ITEM_H = 50;          // ความสูงของแต่ละชื่อ (ต้องตรงกับ .slot-item ใน CSS)
-    const VISIBLE = 3;          // จำนวนช่องที่เห็น (บน-กลาง-ล่าง) ช่องกลางคือช่องล็อก
 
     function escHtml(s) {
         return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    function spinSlot(names) {
+    // ==========================================
+    // 🎲 สุ่ม 1 คน — แอนิเมชันสับชื่อเร็วๆ (ไม่ใช่ธีมคาสิโน)
+    // ==========================================
+    function quickShuffleSingle(names) {
         isSpinning = true;
         const display = document.getElementById('resultDisplay');
-
-        const winner = names[Math.floor(Math.random() * names.length)];
-
-        // สร้างแถบรีลยาวๆ: ชื่อสุ่มซ้ำหลายรอบเพื่อให้ไหลนานๆ แล้วจบที่ผู้ชนะ
-        const REELS = 28; // จำนวนชื่อที่ไหลผ่านก่อนหยุด
-        let reel = [];
-        for (let i = 0; i < REELS; i++) {
-            reel.push(names[Math.floor(Math.random() * names.length)]);
-        }
-        // ตำแหน่งล็อก: ผู้ชนะต้องอยู่ "ช่องกลาง" ตอนหยุด
-        reel.push(names[Math.floor(Math.random() * names.length)]); // ช่องบนของกรอบสุดท้าย
-        reel.push(winner);                                          // ★ ช่องกลาง = ผู้ชนะ
-        const winnerItemIndex = reel.length - 1;                    // ตำแหน่งผู้ชนะในอาเรย์
-        reel.push(names[Math.floor(Math.random() * names.length)]); // ช่องล่าง
-        // buffer ท้ายรองรับการดีดกลับ (overshoot) ไม่ให้เห็นช่องว่าง
-        for (let k = 0; k < 4; k++) reel.push(names[Math.floor(Math.random() * names.length)]);
-
-        const reelHtml = reel.map(n =>
-            `<div class="slot-item">${escHtml(n.length > 16 ? n.slice(0,15)+'…' : n)}</div>`
-        ).join('');
-
-        display.innerHTML = `
-            <div class="slot-stage">
-                <div class="slot-machine">
-                    <div class="slot-title">🎰 J A C K P O T 🎰</div>
-                    <div class="slot-window">
-                        <div class="slot-fade top"></div>
-                        <div class="slot-fade bottom"></div>
-                        <div class="slot-line"></div>
-                        <div class="slot-reel" id="slotReel">${reelHtml}</div>
-                    </div>
-                </div>
-                <div id="slotStatus" style="margin-top:14px;color:#ffd32a;font-weight:800;font-size:1.3rem;">กำลังหมุน... 🎰</div>
-            </div>`;
-
-        const reelEl = document.getElementById('slotReel');
-        // ระยะเลื่อนสุดท้าย: ให้ winnerItemIndex มาอยู่ช่องกลาง
-        // ช่องกลางคือแถวที่ 2 (index 1) ในกรอบ → offset = (winnerItemIndex - 1) * ITEM_H
-        const finalY = (winnerItemIndex - 1) * ITEM_H;
-
-        // แอนิเมชันแบบ JS: เริ่มเร็ว ชะลอลง แล้ว "ดีดเลยเด้งกลับ" (overshoot) เหมือนตู้จริง
-        const duration = 4200;
-        const startTime = performance.now();
-        let lastTickRow = -1;
-
-        // easeOutBack: ดีดเลยปลายทางเล็กน้อยแล้วเด้งกลับ (ลดความแรงให้ดีดแค่ ~นิดเดียว)
-        function easeOutBack(t) {
-            const c1 = 0.8, c3 = c1 + 1;  // c1 ต่ำ = ดีดเลยน้อย ดูเนียน
-            return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
-        }
-
-        function frame(now) {
-            const elapsed = now - startTime;
-            let t = Math.min(elapsed / duration, 1);
-            const eased = easeOutBack(t);
-            const y = eased * finalY;
-            reelEl.style.transform = `translateY(${-y}px)`;
-
-            // เล่นเสียง tick ทุกครั้งที่เลื่อนผ่านชื่อใหม่ (เฉพาะตอนเลื่อนไปข้างหน้า)
-            const row = Math.floor(Math.abs(y) / ITEM_H);
-            if (row !== lastTickRow) { tickSound(); lastTickRow = row; }
-
-            if (t < 1) {
-                requestAnimationFrame(frame);
-            } else {
-                reelEl.style.transform = `translateY(${-finalY}px)`;
-                lockSlot(winner, names, winnerItemIndex);
-            }
-        }
-        requestAnimationFrame(frame);
-    }
-
-    function lockSlot(winner, names, winnerItemIndex) {
-        isSpinning = false;
-        // ไฮไลต์ช่องผู้ชนะ + เสียงดีดล็อก
-        const reelEl = document.getElementById('slotReel');
-        if (reelEl) {
-            const items = reelEl.querySelectorAll('.slot-item');
-            if (items[winnerItemIndex]) items[winnerItemIndex].classList.add('center-win');
-            reelEl.parentElement.classList.add('slot-locked');
-        }
-        beep(1200, 0.08, 'square', 0.12);
-        const status = document.getElementById('slotStatus');
-        if (status) status.innerHTML = '🎉 JACKPOT! 🎉';
-
-        // หน่วงนิดให้เห็นช่องล็อกก่อนเด้งผลเต็ม
-        setTimeout(() => revealWinner(winner, names), 700);
+        display.classList.add('animate-shake');
+        let interval = setInterval(() => {
+            const t = names[Math.floor(Math.random()*names.length)];
+            tickSound();
+            display.innerHTML = `<img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(t)}&backgroundColor=b6e3f4">
+                                 <div class="winner-name" style="font-size:3rem;">${escHtml(t)}</div>`;
+        }, 70);
+        setTimeout(() => {
+            clearInterval(interval);
+            display.classList.remove('animate-shake');
+            isSpinning = false;
+            const winner = names[Math.floor(Math.random() * names.length)];
+            revealWinner(winner, names);
+        }, 1800);
     }
 
     function revealWinner(winner, names) {
