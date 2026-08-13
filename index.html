@@ -131,13 +131,20 @@
         .icon-toggle .ic { font-size: 1.15rem; filter: grayscale(0.6) opacity(0.55); transition: 0.25s; }
         .icon-toggle .state { font-size: 0.62rem; font-weight: 900; letter-spacing: 0.5px; color: var(--gray); transition: 0.25s; }
         .icon-toggle:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); }
-        .icon-toggle.on {
-            background: linear-gradient(160deg, rgba(46,213,115,0.22), rgba(30,144,255,0.18));
+        .icon-toggle.on, .icon-toggle.strict {
+            background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 24%, transparent), color-mix(in srgb, var(--secondary) 18%, transparent));
             border-color: var(--accent);
-            box-shadow: 0 0 12px rgba(46,213,115,0.3), inset 0 0 8px rgba(46,213,115,0.1);
+            box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 35%, transparent), inset 0 0 8px color-mix(in srgb, var(--accent) 12%, transparent);
         }
-        .icon-toggle.on .ic { filter: none; transform: scale(1.1); }
-        .icon-toggle.on .state { color: var(--accent); text-shadow: 0 0 8px rgba(46,213,115,0.6); }
+        .icon-toggle.on .ic, .icon-toggle.strict .ic { filter: none; transform: scale(1.1); }
+        .icon-toggle.on .state, .icon-toggle.strict .state { color: var(--accent); text-shadow: 0 0 8px color-mix(in srgb, var(--accent) 65%, transparent); }
+        .icon-toggle.weighted {
+            background: linear-gradient(160deg, color-mix(in srgb, var(--warning) 26%, transparent), color-mix(in srgb, var(--primary) 16%, transparent));
+            border-color: var(--warning);
+            box-shadow: 0 0 12px color-mix(in srgb, var(--warning) 38%, transparent), inset 0 0 8px color-mix(in srgb, var(--warning) 14%, transparent);
+        }
+        .icon-toggle.weighted .ic { filter: none; transform: scale(1.1); }
+        .icon-toggle.weighted .state { color: var(--warning); text-shadow: 0 0 8px color-mix(in srgb, var(--warning) 65%, transparent); }
         .controls { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
         button.btn-game { padding: 9px 8px; border: none; border-radius: 10px; font-family: 'Kanit', sans-serif; font-size: 0.95rem; font-weight: 800; color: white; cursor: pointer; text-transform: uppercase; position: relative; top: 0; transition: all 0.1s; }
         button.btn-game:active { top: 4px; }
@@ -164,9 +171,22 @@
             background: linear-gradient(180deg,rgba(30,39,46,0.9) 0%,rgba(11,23,42,0.9) 100%);
             border: 4px solid var(--secondary); border-radius: 20px; min-height: 520px; display: flex; flex-direction: column; justify-content: center; align-items: center;
             box-shadow: 0 0 30px rgba(30,144,255,0.3), inset 0 0 20px rgba(0,0,0,0.8); position: relative; overflow: hidden; padding: 30px;
+            transition: box-shadow 0.3s ease;
+        }
+        .result-box.charging { animation: chargeGlow 0.75s ease-in-out infinite alternate; }
+        @keyframes chargeGlow {
+            0%   { box-shadow: 0 0 26px rgba(30,144,255,0.35), inset 0 0 20px rgba(0,0,0,0.8); }
+            100% { box-shadow: 0 0 60px 8px var(--warning), inset 0 0 26px rgba(0,0,0,0.55); }
         }
         .avatar { width: 130px; height: 130px; background: white; border-radius: 50%; padding: 5px; margin-bottom: 12px; border: 5px solid var(--warning); box-shadow: 0 0 25px var(--warning); }
-        .winner-name { font-size: 3.5rem; font-weight: 900; color: #fff; text-shadow: 0 0 10px var(--secondary), 0 0 20px var(--secondary), 0 0 40px var(--primary); margin: 8px 0; text-align: center; line-height: 1.1; letter-spacing: 1px; }
+        .winner-name {
+            font-size: 3.5rem; font-weight: 900; margin: 8px 0; text-align: center; line-height: 1.1; letter-spacing: 1px;
+            background: linear-gradient(100deg, #fff 20%, var(--warning) 40%, #fff 50%, var(--warning) 60%, #fff 80%);
+            background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: #fff;
+            text-shadow: 0 0 10px var(--secondary), 0 0 20px var(--secondary), 0 0 40px var(--primary);
+            animation: nameShine 2.2s linear infinite;
+        }
+        @keyframes nameShine { 0% { background-position: 220% 0; } 100% { background-position: -40% 0; } }
         .challenge-box { background: rgba(255,255,255,0.95); color: var(--dark); padding: 14px 20px; border-radius: 12px; border-left: 8px solid var(--warning); margin-top: 14px; font-size: 1.3rem; font-weight: 600; max-width: 90%; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         .result-list { font-size: 1.25rem; text-align: left; width: 100%; max-height: 420px; overflow-y: auto; }
         .group-item { background: rgba(255,255,255,0.1); margin: 9px 0; padding: 12px; border-radius: 10px; border-left: 6px solid var(--warning); }
@@ -174,6 +194,24 @@
 
         /* ── HISTORY PANEL ── */
         .history-panel { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 14px; text-align: left; }
+
+        /* ── ATTENDANCE (เช็คชื่อ / ขาดเรียนชั่วคราว) ── */
+        .attendance-panel { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 12px 14px; text-align: left; }
+        .attend-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .attend-head strong { color: #ffd32a; font-size: 0.98rem; }
+        .attend-count { font-size: 0.78rem; font-weight: 700; color: var(--warning); }
+        .attend-list { display: flex; flex-wrap: wrap; gap: 6px; max-height: 92px; overflow-y: auto; }
+        .attend-chip {
+            background: color-mix(in srgb, var(--accent) 18%, rgba(255,255,255,0.08));
+            border: 1.5px solid color-mix(in srgb, var(--accent) 45%, transparent);
+            color: rgba(255,255,255,0.92); border-radius: 14px; padding: 4px 12px; font-size: 0.85rem; font-weight: 600;
+            cursor: pointer; user-select: none; transition: all 0.2s; white-space: nowrap;
+        }
+        .attend-chip:hover { transform: translateY(-1px); }
+        .attend-chip.absent {
+            background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.4); text-decoration: line-through; text-decoration-color: var(--primary);
+        }
         .history-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .history-head strong { color: #ffd32a; font-size: 1.05rem; }
         .history-clear { background: rgba(255,71,87,0.2); border: 1px solid var(--primary); color: #ff7081; border-radius: 8px; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; font-family: 'Kanit', sans-serif; font-weight: 600; }
@@ -238,7 +276,7 @@
 
         /* ── WINNER SPOTLIGHT (อลังการ) ── */
         .winner-card {
-            position: relative; display: flex; flex-direction: column; align-items: center;
+            position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;
             padding: 12px 8px; border-radius: 22px; animation: winnerPop 0.6s cubic-bezier(0.2,1.3,0.4,1);
         }
         @keyframes winnerPop { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.06); } 100% { transform: scale(1); opacity: 1; } }
@@ -255,6 +293,32 @@
             color: #fff; font-weight: 800; font-size: 0.95rem; letter-spacing: 2px; text-transform: uppercase;
             padding: 5px 18px; border-radius: 20px; margin-bottom: 4px; box-shadow: 0 4px 14px rgba(0,0,0,0.3);
         }
+
+        /* ── REVEAL FX (แสง/ประกาย ตอนเผยผลลัพธ์) ── */
+        .reveal-flash {
+            position: absolute; inset: 0; z-index: 5; pointer-events: none; border-radius: inherit;
+            background: radial-gradient(circle at 50% 42%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.4) 32%, transparent 68%);
+            animation: flashPulse 0.7s ease-out forwards;
+        }
+        @keyframes flashPulse { 0% { opacity:0; transform:scale(0.4);} 30% { opacity:1; transform:scale(1);} 100% { opacity:0; transform:scale(1.5);} }
+        .sunburst {
+            position: absolute; top: 50%; left: 50%; width: 620px; height: 620px; max-width: 220%; max-height: 220%;
+            transform: translate(-50%,-50%); z-index: 0; pointer-events: none; border-radius: 50%;
+            background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.14) 0deg 5deg, transparent 5deg 17deg);
+            animation: sunburstSpin 10s linear infinite; mix-blend-mode: screen;
+        }
+        @keyframes sunburstSpin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+        .shockwave {
+            position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px;
+            border: 3px solid var(--warning); border-radius: 50%; pointer-events: none; z-index: 0;
+            animation: shockwaveExpand 1s ease-out forwards;
+        }
+        @keyframes shockwaveExpand { 0% { transform: scale(0); opacity: 0.9; } 100% { transform: scale(9); opacity: 0; } }
+        .sparkle {
+            position: absolute; z-index: 6; pointer-events: none; line-height: 1;
+            animation: sparkleTwinkle 1.5s ease-in-out infinite; filter: drop-shadow(0 0 6px rgba(255,255,255,0.85));
+        }
+        @keyframes sparkleTwinkle { 0%,100% { opacity:0; transform: scale(0.3) rotate(0deg); } 50% { opacity:1; transform: scale(1.15) rotate(18deg); } }
 
         /* ── LOADING SKELETON / SPINNER ── */
         .loader-wrap { display: flex; flex-direction: column; align-items: center; gap: 18px; }
@@ -336,15 +400,24 @@
                 <textarea id="nameList" placeholder="รายชื่อนักเรียนจะแสดงที่นี่" oninput="onListEdit()"></textarea>
             </div>
 
+            <div class="attendance-panel">
+                <div class="attend-head">
+                    <strong>🙋 เช็คชื่อวันนี้</strong>
+                    <span class="attend-count" id="attendCount"></span>
+                </div>
+                <div class="attend-list" id="attendanceList">
+                    <span class="history-empty">ยังไม่มีรายชื่อ</span>
+                </div>
+            </div>
+
             <div class="toggle-row">
                 <input type="checkbox" id="challengeMode" hidden>
-                <input type="checkbox" id="noRepeatMode" checked hidden>
                 <input type="checkbox" id="soundMode" checked hidden>
                 <div class="icon-toggle" data-target="challengeMode" onclick="toggleIcon(this)" title="โหมดสุ่มคำถาม / ภารกิจ">
                     <span class="ic">🎯</span><span class="state">OFF</span>
                 </div>
-                <div class="icon-toggle on" data-target="noRepeatMode" onclick="toggleIcon(this)" title="โหมดไม่ซ้ำคน">
-                    <span class="ic">🚫</span><span class="state">ON</span>
+                <div class="icon-toggle strict" id="fairnessToggle" onclick="cycleFairnessMode()" title="วิธีสุ่มไม่ให้ซ้ำ: แตะเพื่อสลับโหมด">
+                    <span class="ic">🚫</span><span class="state">STRICT</span>
                 </div>
                 <div class="icon-toggle on" data-target="soundMode" onclick="toggleIcon(this)" title="เสียง &amp; เอฟเฟกต์">
                     <span class="ic">🔊</span><span class="state">ON</span>
@@ -415,6 +488,9 @@
     let isSpinning    = false;
     let lastDraw      = null;  // สำหรับ undo การสุ่มล่าสุด
     let drawToken     = 0;     // ยกเลิกผลของแอนิเมชันที่ค้างอยู่ เมื่อเปลี่ยนห้อง/รีเซ็ตกลางคัน
+    let fairnessMode  = 'strict';   // 'free' | 'weighted' | 'strict' — วิธีจัดการคนที่เคยถูกสุ่มแล้ว
+    let drawCounts    = {};    // เก็บจำนวนครั้งที่แต่ละชื่อถูกสุ่ม ใช้คำนวณน้ำหนักในโหมด weighted
+    let absentSet     = new Set();  // ชื่อที่ติ๊กขาดเรียนชั่วคราว (ไม่ลบออกจากรายชื่อจริง)
 
     // ==========================================
     // 🔊 WEB AUDIO (สร้างเสียงเองในเบราว์เซอร์ — ไม่ต้องโหลดไฟล์)
@@ -431,12 +507,67 @@
     // ปุ่มไอคอน toggle (แทน checkbox ยาวๆ)
     function toggleIcon(el) {
         const cb = document.getElementById(el.dataset.target);
+        if (!cb) return;   // กันพลาด ถ้า element นี้ไม่ได้ผูกกับ checkbox จริง
         cb.checked = !cb.checked;
         el.classList.toggle('on', cb.checked);
         el.querySelector('.state').textContent = cb.checked ? 'ON' : 'OFF';
         ensureAudio();
         beep(cb.checked ? 900 : 500, 0.06, 'sine', 0.07);
     }
+
+    // ปุ่มเดียว แตะวนสลับ 3 โหมด: ซ้ำได้อิสระ → ถ่วงน้ำหนัก → ไม่ซ้ำเลย → (วนกลับ)
+    const FAIRNESS_ORDER = ['free', 'weighted', 'strict'];
+    const FAIRNESS_META = {
+        free:     { icon: '🔁', label: 'FREE',    title: 'สุ่มอิสระ: ซ้ำได้ทุกครั้งเท่าๆ กัน' },
+        weighted: { icon: '⚖️', label: 'WEIGHT',  title: 'ถ่วงน้ำหนัก: คนที่ยังไม่ค่อยถูกเรียกมีโอกาสสูงกว่า (ยังมีสิทธิ์ซ้ำได้)' },
+        strict:   { icon: '🚫', label: 'STRICT',  title: 'ไม่ซ้ำเลย: คนที่ถูกสุ่มแล้วออกจากรายชื่อจนกว่าจะรีเซ็ต' },
+    };
+    function cycleFairnessMode() {
+        const idx = FAIRNESS_ORDER.indexOf(fairnessMode);
+        fairnessMode = FAIRNESS_ORDER[(idx + 1) % FAIRNESS_ORDER.length];
+        renderFairnessToggle();
+        ensureAudio();
+        beep(700, 0.06, 'sine', 0.07);
+    }
+    function renderFairnessToggle() {
+        const el = document.getElementById('fairnessToggle');
+        if (!el) return;
+        const meta = FAIRNESS_META[fairnessMode];
+        el.classList.remove('on', 'weighted', 'strict');
+        if (fairnessMode !== 'free') el.classList.add(fairnessMode);
+        el.querySelector('.ic').textContent = meta.icon;
+        el.querySelector('.state').textContent = meta.label;
+        el.title = meta.title;
+    }
+
+    // ── เช็คชื่อ / ขาดเรียนชั่วคราว ──
+    function renderAttendance() {
+        const wrap = document.getElementById('attendanceList');
+        const countEl = document.getElementById('attendCount');
+        const all = getAllRawNames();
+        if (all.length === 0) {
+            wrap.innerHTML = '<span class="history-empty">ยังไม่มีรายชื่อ</span>';
+            countEl.textContent = '';
+            return;
+        }
+        wrap.innerHTML = all.map(n => {
+            const isAbsent = absentSet.has(n);
+            return `<span class="attend-chip${isAbsent ? ' absent' : ''}" data-name="${escHtml(n)}">${escHtml(n)}</span>`;
+        }).join('');
+        const absentCount = all.filter(n => absentSet.has(n)).length;
+        countEl.textContent = absentCount > 0 ? `ขาด ${absentCount} คน` : '';
+    }
+    document.getElementById('attendanceList').addEventListener('click', (e) => {
+        const chip = e.target.closest('.attend-chip');
+        if (!chip) return;
+        const name = chip.dataset.name;
+        if (absentSet.has(name)) absentSet.delete(name); else absentSet.add(name);
+        renderAttendance();
+        updateStats();
+        ensureAudio();
+        beep(absentSet.has(name) ? 400 : 700, 0.06, 'sine', 0.06);
+    });
+
     function beep(freq, dur, type, vol) {
         if (!soundOn() || !audioCtx) return;
         const o = audioCtx.createOscillator();
@@ -539,7 +670,7 @@
         document.getElementById('statRemain').textContent = remaining;
         document.getElementById('progressFill').style.width = pct + '%';
     }
-    function onListEdit() { updateStats(); }
+    function onListEdit() { updateStats(); renderAttendance(); }
 
     function addHistory(name) {
         drawHistory.push(name);
@@ -592,7 +723,7 @@
     });
 
     async function loadAppData() {
-        if (!GAS_API_URL || GAS_API_URL === "https://script.google.com/macros/s/AKfycbwO-3AA_Eev42zUIWkYLmdSmMKzZ2b-j2t0Dtol0RpgbJAPzVIwPYq8RhsAZ0qh7cUl/exec") {
+        if (!GAS_API_URL || GAS_API_URL === "YOUR_WEB_APP_URL_HERE") {
             document.getElementById('resultDisplay').innerHTML = '<span style="color:#ff4757;font-size:1.5rem;">⚠️ กรุณาใส่ GAS Web App URL ในโค้ดก่อนครับ</span>';
             return;
         }
@@ -631,16 +762,19 @@
 
     function onRoomChange() {
         drawToken++; isSpinning = false;   // ยกเลิกผลของแอนิเมชันที่กำลังวิ่งอยู่
+        document.getElementById('resultDisplay').classList.remove('charging', 'animate-shake');
         const room = document.getElementById('savedRooms').value;
         const ta = document.getElementById('nameList');
         clearHistory();
         hideUndoBar(); lastDraw = null;
+        absentSet = new Set(); drawCounts = {};   // เริ่มต้นใหม่: ไม่มีใครขาด, ยังไม่มีใครถูกสุ่ม
         if (room && allClassrooms[room]) {
             ta.value = allClassrooms[room].join('\n');
             totalInRoom = allClassrooms[room].length;
             updateStats();
+            renderAttendance();
             document.getElementById('resultDisplay').innerHTML = '<span style="color:#1e90ff;font-size:2.5rem;font-weight:800;">PRESS START 🎰</span>';
-        } else { ta.value = ''; totalInRoom = 0; updateStats(); }
+        } else { ta.value = ''; totalInRoom = 0; updateStats(); renderAttendance(); }
     }
 
     function resetRoom() {
@@ -651,13 +785,31 @@
             totalInRoom = allClassrooms[room].length;
             clearHistory();
             hideUndoBar(); lastDraw = null;
+            absentSet = new Set(); drawCounts = {};
             updateStats();
+            renderAttendance();
             document.getElementById('resultDisplay').innerHTML = '<span style="color:#ffa502;">🔄 รีเซ็ตรายชื่อครบแล้ว!</span>';
         } else { alert('กรุณาเลือกห้องเรียนก่อนครับ!'); }
     }
 
-    function getNames() { return document.getElementById('nameList').value.split('\n').map(n => n.trim()).filter(n => n !== ''); }
+    // รายชื่อทั้งหมดในกล่องข้อความ (รวมคนที่ติ๊กขาดเรียนด้วย) — ใช้ตอนแก้ไข textarea เอง เพื่อไม่ให้ชื่อคนขาดหาย
+    function getAllRawNames() { return document.getElementById('nameList').value.split('\n').map(n => n.trim()).filter(n => n !== ''); }
+    // รายชื่อที่ "พร้อมสุ่ม" จริง (ตัดคนขาดเรียนออก) — ใช้ตอนสุ่มทุกโหมดและคำนวณสถิติ
+    function getNames() { return getAllRawNames().filter(n => !absentSet.has(n)); }
     function shuffle(a) { let c=a.length,r; while(c!=0){r=Math.floor(Math.random()*c);c--;[a[c],a[r]]=[a[r],a[c]];} return a; }
+
+    // สุ่มผู้ชนะ 1 คน ตาม fairnessMode: 'weighted' จะให้คนที่ยังไม่ค่อยถูกเรียกมีโอกาสสูงกว่า
+    function pickWeightedWinner(names) {
+        if (fairnessMode !== 'weighted') return names[Math.floor(Math.random() * names.length)];
+        const weights = names.map(n => 1 / ((drawCounts[n] || 0) + 1));
+        const total = weights.reduce((a, b) => a + b, 0);
+        let r = Math.random() * total;
+        for (let i = 0; i < names.length; i++) {
+            r -= weights[i];
+            if (r <= 0) return names[i];
+        }
+        return names[names.length - 1];
+    }
 
     // ==========================================
     // 🐾 ทีมมาสคอต (สำหรับโหมดจัดทีม)
@@ -696,7 +848,22 @@
     }
 
     function escHtml(s) {
-        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    // ── ประกาย ✨ กระจายตัวแบบสุ่ม ใช้ตอนเผยผลลัพธ์ ──
+    const SPARKLE_GLYPHS = ['✨','⭐','💫'];
+    function sparkleHtml(count) {
+        let s = '';
+        for (let i = 0; i < count; i++) {
+            const glyph = SPARKLE_GLYPHS[Math.floor(Math.random()*SPARKLE_GLYPHS.length)];
+            const left = (6 + Math.random()*88).toFixed(1);
+            const top = (4 + Math.random()*82).toFixed(1);
+            const size = (1.0 + Math.random()*1.1).toFixed(2);
+            const delay = (Math.random()*1.4).toFixed(2);
+            s += `<span class="sparkle" style="left:${left}%;top:${top}%;font-size:${size}rem;animation-delay:${delay}s;">${glyph}</span>`;
+        }
+        return s;
     }
 
     // ==========================================
@@ -707,6 +874,7 @@
         const myToken = drawToken;
         const display = document.getElementById('resultDisplay');
         display.classList.add('animate-shake');
+        display.classList.add('charging');
         let interval = setInterval(() => {
             if (myToken !== drawToken) { clearInterval(interval); return; }
             const t = names[Math.floor(Math.random()*names.length)];
@@ -719,7 +887,7 @@
             display.classList.remove('animate-shake');
             if (myToken !== drawToken) return;   // ถูกยกเลิกกลางคัน (เปลี่ยนห้อง/รีเซ็ต)
             isSpinning = false;
-            const winner = names[Math.floor(Math.random() * names.length)];
+            const winner = pickWeightedWinner(names);
             revealWinner(winner, names);
         }, 1800);
     }
@@ -729,7 +897,8 @@
         isSpinning = true;
         const myToken = drawToken;
         const display = document.getElementById('resultDisplay');
-        const winner = names[Math.floor(Math.random() * names.length)];
+        display.classList.add('charging');
+        const winner = pickWeightedWinner(names);
         let count = 3;
         display.innerHTML = `<div class="countdown-stage">
                                 <div class="countdown-num countdown-pop" id="countdownNum">${count}</div>
@@ -760,7 +929,8 @@
         isSpinning = true;
         const myToken = drawToken;
         const display = document.getElementById('resultDisplay');
-        const winner = names[Math.floor(Math.random() * names.length)];
+        display.classList.add('charging');
+        const winner = pickWeightedWinner(names);
         display.innerHTML = `<div class="flip-stage">
                                 <div class="flip-card" id="flipCard">
                                     <div class="flip-card-face" id="flipFace">${escHtml(names[Math.floor(Math.random()*names.length)])}</div>
@@ -799,6 +969,7 @@
         const myToken = drawToken;
         const display = document.getElementById('resultDisplay');
         display.classList.add('animate-shake');
+        display.classList.add('charging');
         let interval = setInterval(() => tickSound(), 70);
         setTimeout(() => {
             clearInterval(interval);
@@ -810,6 +981,8 @@
     }
 
     function revealTeams(shuffledNames, teamCount) {
+        const display = document.getElementById('resultDisplay');
+        display.classList.remove('charging');
         winSound();
         confetti({ particleCount: 200, spread: 120, origin: { y: 0.6 } });
 
@@ -817,8 +990,9 @@
         const teams = Array.from({ length: teamCount }, () => []);
         shuffledNames.forEach((name, i) => { teams[i % teamCount].push(name); });
 
-        const display = document.getElementById('resultDisplay');
-        let html = `<div class="team-reveal">
+        let html = `<div class="reveal-flash"></div>
+                    ${sparkleHtml(7)}
+                    <div class="team-reveal">
                         <div class="team-reveal-title">🏆 จัดทีมเรียบร้อย! 🏆</div>
                         <div class="team-grid">`;
         teams.forEach((members, i) => {
@@ -836,15 +1010,21 @@
 
     function revealWinner(winner, names) {
         const display = document.getElementById('resultDisplay');
+        display.classList.remove('charging');
         winSound();
         confetti({ particleCount: 220, spread: 110, origin: { y: 0.6 } });
         setTimeout(() => confetti({ particleCount: 80, angle: 60, spread: 70, origin: { x: 0 } }), 200);
         setTimeout(() => confetti({ particleCount: 80, angle: 120, spread: 70, origin: { x: 1 } }), 200);
 
         const order = drawHistory.length + 1;
-        let html = `<div class="winner-card">
+        let html = `<div class="reveal-flash"></div>
+                    <div class="sunburst"></div>
+                    ${sparkleHtml(10)}
+                    <div class="winner-card">
                         <span class="winner-badge">🏆 Winner #${order}</span>
                         <div class="avatar-halo">
+                            <span class="shockwave"></span>
+                            <span class="shockwave" style="animation-delay:0.16s;"></span>
                             <img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(winner)}&backgroundColor=b6e3f4">
                         </div>
                         <div class="winner-name">${escHtml(winner)}</div>`;
@@ -865,10 +1045,12 @@
         if (scoreBtn) scoreBtn.addEventListener('click', () => giveScore(winner, scoreBtn));
 
         addHistory(winner);
+        drawCounts[winner] = (drawCounts[winner] || 0) + 1;   // ใช้คำนวณน้ำหนักโหมด weighted ครั้งถัดไป
 
-        // โหมดไม่ซ้ำ: เอาผู้ชนะออกจากรายชื่อ (เอาออกแค่ 1 คน แม้มีชื่อซ้ำกันในลิสต์) + เก็บ state ไว้ undo
-        if (document.getElementById('noRepeatMode').checked) {
-            const before = getNames();
+        // โหมด "ไม่ซ้ำเลย": เอาผู้ชนะออกจากรายชื่อ (เอาออกแค่ 1 คน แม้มีชื่อซ้ำกันในลิสต์) + เก็บ state ไว้ undo
+        // ใช้ getAllRawNames() (ไม่ใช่ getNames()) เป็นฐาน เพื่อไม่ให้คนที่ติ๊กขาดเรียนอยู่ตอนนี้หายไปจากกล่องข้อความ
+        if (fairnessMode === 'strict') {
+            const before = getAllRawNames();
             const idx = before.indexOf(winner);
             const remain = idx === -1 ? before : before.slice(0, idx).concat(before.slice(idx + 1));
             document.getElementById('nameList').value = remain.join('\n');
@@ -878,6 +1060,7 @@
         }
         showUndoBar(winner);
         updateStats();
+        renderAttendance();
     }
 
     // ── UNDO ──
@@ -890,16 +1073,22 @@
     function undoLastDraw() {
         if (!lastDraw) return;
         // คืนชื่อกลับเข้า list (ถ้าถูกเอาออก) — คืนแค่ 1 คนเสมอ ตรงกับตอนที่เอาออก
+        // ใช้ getAllRawNames() เพื่อไม่ให้คนที่ติ๊กขาดเรียนอยู่ตอนนี้หายไปจากกล่องข้อความ
         if (lastDraw.removed) {
-            const cur = getNames();
+            const cur = getAllRawNames();
             cur.push(lastDraw.name);
             document.getElementById('nameList').value = cur.join('\n');
+        }
+        if (drawCounts[lastDraw.name]) {
+            drawCounts[lastDraw.name]--;
+            if (drawCounts[lastDraw.name] <= 0) delete drawCounts[lastDraw.name];
         }
         // เอาออกจากประวัติ (ตัวล่าสุด)
         const idx = drawHistory.lastIndexOf(lastDraw.name);
         if (idx !== -1) drawHistory.splice(idx, 1);
         renderHistory();
         updateStats();
+        renderAttendance();
         hideUndoBar();
         ensureAudio(); beep(440, 0.1, 'sine', 0.08);
         document.getElementById('resultDisplay').innerHTML = '<span style="color:#1e90ff;font-size:2.2rem;font-weight:800;">↩️ ดึงกลับแล้ว<br>PRESS START 🎰</span>';
@@ -930,6 +1119,7 @@
         const myToken = drawToken;
         const display = document.getElementById('resultDisplay');
         display.classList.add('animate-shake');
+        display.classList.add('charging');
         let interval = setInterval(() => {
             if (myToken !== drawToken) { clearInterval(interval); return; }
             const t = names[Math.floor(Math.random()*names.length)];
@@ -948,9 +1138,12 @@
 
     function showGroupResult(mode, names, display) {
         const shuffled = shuffle([...names]);
+        display.classList.remove('charging');
         winSound();
+        confetti({ particleCount: 160, spread: 100, origin: { y: 0.6 } });
+        const fx = `<div class="reveal-flash"></div>${sparkleHtml(7)}`;
         if (mode === 'pair') {
-            let html = '<div class="result-list"><strong style="color:#ffd32a;font-size:1.5rem;">👥 จับคู่ลุยงาน:</strong><br>';
+            let html = fx + '<div class="result-list"><strong style="color:#ffd32a;font-size:1.5rem;">👥 จับคู่ลุยงาน:</strong><br>';
             for (let i=0;i<shuffled.length;i+=2){
                 const p1=escHtml(shuffled[i]), p2=shuffled[i+1]?escHtml(shuffled[i+1]):'<span style="color:#ff4757;">(ไม่มีคู่/เหงาๆ)</span>';
                 html += `<div class="group-item">${p1} <span style="font-size:1.5rem;">🤝</span> ${p2}</div>`;
@@ -959,7 +1152,7 @@
         } else if (mode === 'group') {
             const size = parseInt(document.getElementById('groupSize').value);
             if (isNaN(size)||size<2) return alert('ระบุขนาดกลุ่มให้ถูกต้อง');
-            let html = `<div class="result-list"><strong style="color:#ffd32a;font-size:1.5rem;">📦 จัดกลุ่ม (กลุ่มละ ${size} คน):</strong><br>`;
+            let html = fx + `<div class="result-list"><strong style="color:#ffd32a;font-size:1.5rem;">📦 จัดกลุ่ม (กลุ่มละ ${size} คน):</strong><br>`;
             let g=1;
             for (let i=0;i<shuffled.length;i+=size){
                 html += `<div class="group-item"><strong style="color:#2ed573;">ทีมที่ ${g}:</strong> ${shuffled.slice(i,i+size).map(escHtml).join(', ')}</div>`; g++;
