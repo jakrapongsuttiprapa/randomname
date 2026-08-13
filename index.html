@@ -298,13 +298,6 @@
             animation: flashPulse 0.7s ease-out forwards;
         }
         @keyframes flashPulse { 0% { opacity:0; transform:scale(0.4);} 30% { opacity:1; transform:scale(1);} 100% { opacity:0; transform:scale(1.5);} }
-        .sunburst {
-            position: absolute; top: 50%; left: 50%; width: 620px; height: 620px; max-width: 220%; max-height: 220%;
-            transform: translate(-50%,-50%); z-index: 0; pointer-events: none; border-radius: 50%;
-            background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.14) 0deg 5deg, transparent 5deg 17deg);
-            animation: sunburstSpin 10s linear infinite; mix-blend-mode: screen;
-        }
-        @keyframes sunburstSpin { to { transform: translate(-50%,-50%) rotate(360deg); } }
         .shockwave {
             position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px;
             border: 3px solid var(--warning); border-radius: 50%; pointer-events: none; z-index: 0;
@@ -1015,7 +1008,6 @@
 
         const order = drawHistory.length + 1;
         let html = `<div class="reveal-flash"></div>
-                    <div class="sunburst"></div>
                     ${sparkleHtml(10)}
                     <div class="winner-card">
                         <span class="winner-badge">🏆 Winner #${order}</span>
