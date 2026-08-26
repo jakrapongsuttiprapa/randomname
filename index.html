@@ -257,6 +257,24 @@
         .animate-shake { animation: screenShake 0.1s infinite alternate; }
         @keyframes screenShake { from { transform: translate(-2px,1px); filter: brightness(1.2); } to { transform: translate(2px,-1px); filter: brightness(0.8); } }
 
+        /* ── FAKEOUT TWIST (แกล้งสลับชื่อตอนใกล้จบ) ── */
+        .result-box.fakeout-twist { animation: fakeoutShake 0.5s ease-in-out; }
+        @keyframes fakeoutShake {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            20% { transform: translateX(-12px) rotate(-2deg); }
+            40% { transform: translateX(10px) rotate(2deg); }
+            60% { transform: translateX(-8px) rotate(-1deg); }
+            80% { transform: translateX(8px) rotate(1deg); }
+        }
+        .result-box.fakeout-twist::after {
+            content: 'เดี๋ยวก่อน...!'; position: absolute; inset: 0; z-index: 20; opacity: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.4rem; font-weight: 900; color: #fff; text-align: center;
+            background: rgba(180,20,20,0.55); border-radius: inherit;
+            animation: fakeoutBanner 0.55s ease-in-out;
+        }
+        @keyframes fakeoutBanner { 0%, 100% { opacity: 0; } 35%, 70% { opacity: 1; } }
+
         /* ── FOCUS MODE (ซ่อนแผงซ้าย เหลือเวที) ── */
         body.focus-mode .input-section { display: none; }
         body.focus-mode .container { max-width: 820px; }
@@ -752,7 +770,7 @@
 
     function onRoomChange() {
         drawToken++; isSpinning = false;   // ยกเลิกผลของแอนิเมชันที่กำลังวิ่งอยู่
-        document.getElementById('resultDisplay').classList.remove('charging', 'animate-shake');
+        document.getElementById('resultDisplay').classList.remove('charging', 'animate-shake', 'fakeout-twist');
         const room = document.getElementById('savedRooms').value;
         const ta = document.getElementById('nameList');
         clearHistory();
@@ -764,7 +782,10 @@
             updateStats();
             renderAttendance();
             document.getElementById('resultDisplay').innerHTML = '<span style="color:#1e90ff;font-size:2.5rem;font-weight:800;">PRESS START 🎰</span>';
-        } else { ta.value = ''; totalInRoom = 0; updateStats(); renderAttendance(); }
+        } else {
+            ta.value = ''; totalInRoom = 0; updateStats(); renderAttendance();
+            document.getElementById('resultDisplay').innerHTML = '<span style="color:#747d8c;font-size:1.8rem;font-weight:600;">กรุณาเลือกห้องเรียน... ⏳</span>';
+        }
     }
 
     function resetRoom() {
@@ -824,7 +845,7 @@
 
         if (mode === 'single') {
             // สุ่มรูปแบบแอนิเมชันการสุ่ม 1 คน แบบไม่ล็อกรูปแบบเดิมซ้ำๆ
-            const drawStyles = [quickShuffleSingle, countdownDraw, cardFlipDraw];
+            const drawStyles = [quickShuffleSingle, countdownDraw, cardFlipDraw, fakeoutDraw];
             const pick = drawStyles[Math.floor(Math.random() * drawStyles.length)];
             pick(names);
         } else if (mode === 'team') {
@@ -944,6 +965,60 @@
                 }, 450);
             }
         }, 180);
+    }
+
+    // แบบที่ 4: แกล้งเผยชื่อ "ปลอม" ก่อน ทำท่าเหมือนจบแล้ว แล้วสลับเป็นผู้ชนะจริงแบบไม่ทันตั้งตัว
+    function fakeoutDraw(names) {
+        isSpinning = true;
+        const myToken = drawToken;
+        const display = document.getElementById('resultDisplay');
+        display.classList.add('animate-shake');
+        display.classList.add('charging');
+
+        const winner = pickWeightedWinner(names);
+        const decoyPool = names.filter(n => n !== winner);
+        // ถ้าไม่มีชื่ออื่นให้แกล้ง (เหลือคนเดียว) ข้ามไปเผยผลจริงเลย ไม่ต้องหลอก
+        if (decoyPool.length === 0) {
+            display.classList.remove('animate-shake', 'charging');
+            isSpinning = false;
+            revealWinner(winner, names);
+            return;
+        }
+        const decoy = decoyPool[Math.floor(Math.random() * decoyPool.length)];
+
+        let interval = setInterval(() => {
+            if (myToken !== drawToken) { clearInterval(interval); return; }
+            const t = names[Math.floor(Math.random()*names.length)];
+            tickSound();
+            display.innerHTML = `<img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(t)}&backgroundColor=b6e3f4">
+                                 <div class="winner-name" style="font-size:3rem;">${escHtml(t)}</div>`;
+        }, 70);
+
+        setTimeout(() => {
+            clearInterval(interval);
+            display.classList.remove('animate-shake');
+            if (myToken !== drawToken) return;
+            // ล็อกที่ชื่อ "ปลอม" ก่อน ทำท่าเหมือนสุ่มจบแล้ว
+            display.innerHTML = `<div class="winner-card">
+                                    <span class="winner-badge">🏆 WINNER?</span>
+                                    <div class="avatar-halo"><img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(decoy)}&backgroundColor=b6e3f4"></div>
+                                    <div class="winner-name">${escHtml(decoy)}</div>
+                                  </div>`;
+            beep(880, 0.15, 'triangle', 0.1);
+
+            setTimeout(() => {
+                if (myToken !== drawToken) return;
+                // แกล้งสลับ: จอสั่น + ป้ายเบรกกลางทาง ก่อนเผยผู้ชนะจริง
+                display.classList.add('fakeout-twist');
+                beep(180, 0.22, 'sawtooth', 0.12);
+                setTimeout(() => {
+                    display.classList.remove('fakeout-twist', 'charging');
+                    if (myToken !== drawToken) return;
+                    isSpinning = false;
+                    revealWinner(winner, names);
+                }, 550);
+            }, 1300);
+        }, 1800);
     }
 
     // ==========================================
