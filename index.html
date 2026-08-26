@@ -169,7 +169,7 @@
         /* ── RESULT / STAGE ── */
         .result-box {
             background: linear-gradient(180deg,rgba(30,39,46,0.9) 0%,rgba(11,23,42,0.9) 100%);
-            border: 4px solid var(--secondary); border-radius: 20px; min-height: 520px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            border: 4px solid var(--secondary); border-radius: 20px; min-height: 600px; display: flex; flex-direction: column; justify-content: center; align-items: center;
             box-shadow: 0 0 30px rgba(30,144,255,0.3), inset 0 0 20px rgba(0,0,0,0.8); position: relative; overflow: hidden; padding: 30px;
             transition: box-shadow 0.3s ease;
         }
@@ -180,9 +180,9 @@
         }
         .avatar { width: 130px; height: 130px; background: white; border-radius: 50%; padding: 5px; margin-bottom: 12px; border: 5px solid var(--warning); box-shadow: 0 0 25px var(--warning); }
         .winner-name {
-            font-size: 3.5rem; font-weight: 900; margin: 8px 0; text-align: center; line-height: 1.3; letter-spacing: 0.5px;
+            font-size: 5rem; font-weight: 900; margin: 10px 0; text-align: center; line-height: 1.25; letter-spacing: 0.5px;
             color: #fff;
-            text-shadow: 0 2px 0 rgba(0,0,0,0.55), 0 4px 14px rgba(0,0,0,0.85), 0 0 22px var(--secondary), 0 0 42px var(--primary);
+            text-shadow: 0 3px 0 rgba(0,0,0,0.55), 0 6px 18px rgba(0,0,0,0.85), 0 0 28px var(--secondary), 0 0 52px var(--primary);
         }
         .challenge-box { background: rgba(255,255,255,0.95); color: var(--dark); padding: 14px 20px; border-radius: 12px; border-left: 8px solid var(--warning); margin-top: 14px; font-size: 1.3rem; font-weight: 600; max-width: 90%; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         .result-list { font-size: 1.25rem; text-align: left; width: 100%; max-height: 420px; overflow-y: auto; }
@@ -327,18 +327,18 @@
             padding: 12px 8px; border-radius: 22px; animation: winnerPop 0.6s cubic-bezier(0.2,1.3,0.4,1);
         }
         @keyframes winnerPop { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.06); } 100% { transform: scale(1); opacity: 1; } }
-        .avatar-halo { position: relative; width: 150px; height: 150px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; }
+        .avatar-halo { position: relative; width: 200px; height: 200px; margin-bottom: 14px; display: flex; align-items: center; justify-content: center; }
         .avatar-halo::before {
-            content: ''; position: absolute; inset: -14px; border-radius: 50%;
+            content: ''; position: absolute; inset: -18px; border-radius: 50%;
             background: conic-gradient(var(--primary), var(--warning), var(--accent), var(--secondary), var(--primary));
             animation: haloSpin 3s linear infinite; filter: blur(3px); opacity: 0.85;
         }
         @keyframes haloSpin { to { transform: rotate(360deg); } }
-        .avatar-halo .avatar { position: relative; margin: 0; width: 130px; height: 130px; z-index: 1; }
+        .avatar-halo .avatar { position: relative; margin: 0; width: 175px; height: 175px; z-index: 1; }
         .winner-badge {
             display: inline-block; background: linear-gradient(90deg, var(--warning), var(--primary));
-            color: #fff; font-weight: 800; font-size: 0.95rem; letter-spacing: 2px; text-transform: uppercase;
-            padding: 5px 18px; border-radius: 20px; margin-bottom: 4px; box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+            color: #fff; font-weight: 800; font-size: 1.15rem; letter-spacing: 2px; text-transform: uppercase;
+            padding: 7px 22px; border-radius: 20px; margin-bottom: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.3);
         }
 
         /* ── REVEAL FX (แสง/ประกาย ตอนเผยผลลัพธ์) ── */
@@ -385,7 +385,8 @@
 
         @media (max-width: 600px) {
             .container { padding: 20px; } h1 { font-size: 2.1rem; }
-            .avatar-halo { width: 120px; height: 120px; } .avatar-halo .avatar { width: 105px; height: 105px; }
+            .avatar-halo { width: 150px; height: 150px; } .avatar-halo .avatar { width: 130px; height: 130px; }
+            .winner-name { font-size: 3.1rem; }
         }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
@@ -876,8 +877,8 @@
         drawToken++;
 
         if (mode === 'single') {
-            // สุ่มรูปแบบแอนิเมชันการสุ่ม 1 คน — ให้ลูกเล่นแกล้งสลับชื่อขึ้นบ่อยขึ้น (ครึ่งหนึ่งของครั้ง) ที่เหลือสลับ 3 แบบเดิม
-            if (Math.random() < 0.5) {
+            // สุ่มรูปแบบแอนิเมชันการสุ่ม 1 คน — เด็กๆ ชอบลูกเล่นแกล้งสลับชื่อมาก ให้ขึ้นบ่อยๆ (75%) ที่เหลือสลับ 3 แบบเดิมเพื่อความหลากหลาย
+            if (Math.random() < 0.75) {
                 fakeoutDraw(names);
             } else {
                 const otherStyles = [quickShuffleSingle, countdownDraw, cardFlipDraw];
@@ -1024,7 +1025,7 @@
         }
         // ปกติแกล้ง 1 รอบ แต่ถ้ามีคนพอ บางครั้ง (30%) จะแกล้งซ้อน 2 รอบ
         const shuffledDecoys = shuffle([...decoyPool]);
-        const decoys = (decoyPool.length >= 2 && Math.random() < 0.3)
+        const decoys = (decoyPool.length >= 2 && Math.random() < 0.4)
             ? [shuffledDecoys[0], shuffledDecoys[1]]
             : [shuffledDecoys[0]];
 
