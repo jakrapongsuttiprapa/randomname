@@ -776,7 +776,7 @@
                 <div class="skeleton-bar" style="width:160px;"></div>
              </div>`;
         try {
-            const response = await fetch(GAS_API_URL + "?action=getAppData");
+            const response = await fetch(GAS_API_URL + "?action=getAppData&_ts=" + Date.now(), { cache: 'no-store' });
             const data = await response.json();
             if (data.Error) {
                 document.getElementById('resultDisplay').innerHTML = '<span style="color:#ff4757;">⚠️ ไม่พบข้อมูล กรุณาตรวจสอบชีต</span>';
