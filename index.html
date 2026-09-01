@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tr. Oat's Lucky Draw Arcade</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -18,16 +18,23 @@
         * { box-sizing: border-box; }
         body {
             font-family: 'Kanit', sans-serif; margin: 0; padding: 20px;
-            background-color: #eef2ff;
+            background-color: #1a0b2e;
             background-image:
-                radial-gradient(circle at 12% 18%, rgba(255,159,67,0.45) 0%, transparent 38%),
-                radial-gradient(circle at 88% 12%, rgba(46,213,115,0.40) 0%, transparent 36%),
-                radial-gradient(circle at 78% 88%, rgba(30,144,255,0.42) 0%, transparent 40%),
-                radial-gradient(circle at 18% 85%, rgba(155,89,182,0.40) 0%, transparent 38%),
-                radial-gradient(rgba(80,80,140,0.10) 1.5px, transparent 1.5px);
-            background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 22px 22px;
+                radial-gradient(ellipse at 50% -10%, rgba(255,240,190,0.16) 0%, transparent 55%),
+                radial-gradient(circle at 12% 18%, rgba(139,21,56,0.40) 0%, transparent 42%),
+                radial-gradient(circle at 88% 12%, rgba(245,197,24,0.16) 0%, transparent 38%),
+                radial-gradient(circle at 78% 88%, rgba(139,21,56,0.34) 0%, transparent 44%),
+                radial-gradient(rgba(245,197,24,0.07) 1.5px, transparent 1.5px);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 26px 26px;
             min-height: 100vh; display: flex; justify-content: center; align-items: flex-start;
             color: var(--light); overflow-x: hidden; transition: background-color 0.5s;
+        }
+        /* กรวยแสงสปอตไลต์ส่องลงมาจากด้านบน */
+        .spotlight {
+            position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+            width: 62vw; height: 105vh; z-index: 0; pointer-events: none;
+            background: linear-gradient(180deg, rgba(255,244,205,0.20) 0%, rgba(255,244,205,0.07) 42%, transparent 78%);
+            clip-path: polygon(40% 0, 60% 0, 100% 100%, 0% 100%);
         }
         .top-controls { position: fixed; top: 18px; right: 18px; z-index: 1000; display: flex; gap: 8px; }
         .fs-btn {
@@ -38,26 +45,28 @@
         .fs-btn:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
         .fs-btn.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 16px var(--accent); }
         .container {
-            background: rgba(18,18,30,0.82); padding: 32px; border-radius: 28px;
-            box-shadow: 0 25px 60px rgba(40,30,90,0.4), 0 0 0 1px rgba(255,255,255,0.08), inset 0 0 0 2px rgba(255,255,255,0.06);
+            background: linear-gradient(180deg, rgba(38,14,58,0.90) 0%, rgba(20,8,36,0.94) 100%);
+            padding: 32px; border-radius: 24px;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.65), 0 0 0 2px var(--warning), inset 0 0 0 5px rgba(0,0,0,0.35), inset 0 0 70px rgba(139,21,56,0.22);
             max-width: 1100px; width: 100%; text-align: center; backdrop-filter: blur(18px);
             transition: max-width 0.45s ease; position: relative; z-index: 1;
         }
         .header-wrap { margin-bottom: 18px; }
         h1 {
-            font-size: 2.9rem; margin: 0 0 4px; font-weight: 900; letter-spacing: 1px; line-height: 1.1;
-            background: linear-gradient(110deg, var(--primary) 0%, var(--warning) 45%, var(--accent) 100%);
-            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 2px 10px rgba(0,0,0,0.35));
+            font-family: 'Bebas Neue', 'Kanit', sans-serif;
+            font-size: 3.6rem; margin: 0 0 2px; font-weight: 400; letter-spacing: 4px; line-height: 1;
+            color: var(--warning);
+            text-shadow: 0 0 22px color-mix(in srgb, var(--warning) 60%, transparent), 0 3px 0 rgba(0,0,0,0.55), 0 6px 20px rgba(0,0,0,0.6);
         }
-        h1 .h1-accent { -webkit-text-fill-color: transparent; }
-        .subtitle { margin: 0; color: rgba(255,255,255,0.5); font-size: 0.92rem; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; }
+        h1 .h1-accent { color: #fff6dc; text-shadow: 0 0 24px rgba(255,246,220,0.65), 0 3px 0 rgba(0,0,0,0.5); }
+        .subtitle { margin: 0; color: rgba(255,235,180,0.62); font-size: 0.86rem; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; }
 
         /* ── THEME SWITCHER ── */
         .theme-bar { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
         .theme-label { font-size: 0.85rem; color: rgba(255,255,255,0.5); font-weight: 600; }
         .theme-btn { width: 28px; height: 28px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.2); cursor: pointer; transition: 0.2s; }
         .theme-btn:hover, .theme-btn.active { border-color: white; transform: scale(1.25); }
+        .theme-btn[data-theme="showtime"]{ background: linear-gradient(135deg,#f5c518,#8b1538); }
         .theme-btn[data-theme="arcade"]  { background: linear-gradient(135deg,#ff4757,#1e90ff); }
         .theme-btn[data-theme="ocean"]   { background: linear-gradient(135deg,#00cec9,#74b9ff); }
         .theme-btn[data-theme="sunset"]  { background: linear-gradient(135deg,#fd79a8,#fdcb6e); }
@@ -83,7 +92,7 @@
 
         /* ── STATS BAR ── */
         .stats-bar { display: flex; justify-content: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
-        .stat-chip { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 6px 16px; font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 6px; transition: 0.3s; }
+        .stat-chip { background: rgba(0,0,0,0.3); border: 1px solid color-mix(in srgb, var(--warning) 38%, transparent); border-radius: 999px; padding: 6px 16px; font-size: 0.95rem; font-weight: 700; color: #ffe9a8; display: flex; align-items: center; gap: 6px; transition: 0.3s; }
         .stat-chip.drawn  { border-color: var(--warning); color: var(--warning); }
         .stat-chip.remain { border-color: var(--accent);  color: var(--accent); }
         .stat-chip .num   { font-size: 1.3rem; font-weight: 900; }
@@ -93,7 +102,7 @@
         .layout { display: flex; flex-wrap: wrap; gap: 25px; }
         .input-section { flex: 1; min-width: 320px; display: flex; flex-direction: column; gap: 10px; }
         .result-section { flex: 1.3; min-width: 360px; }
-        .glass-panel { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.1); text-align: left; }
+        .glass-panel { background: rgba(0,0,0,0.28); padding: 15px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--warning) 25%, transparent); text-align: left; }
         select, textarea, input[type="number"] {
             width: 100%; padding: 12px; border-radius: 12px; font-family: 'Kanit', sans-serif; font-size: 1.1rem; font-weight: 600;
             background: rgba(255,255,255,0.9); color: var(--dark); border: 3px solid transparent; outline: none; transition: 0.3s;
@@ -149,11 +158,11 @@
         button.btn-game { padding: 9px 8px; border: none; border-radius: 10px; font-family: 'Kanit', sans-serif; font-size: 0.95rem; font-weight: 800; color: white; cursor: pointer; text-transform: uppercase; position: relative; top: 0; transition: all 0.1s; }
         button.btn-game:active { top: 4px; }
         button.btn-game:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-single { background-color: var(--primary); box-shadow: 0 4px 0 var(--primary-dark); }
+        .btn-single { background: linear-gradient(180deg, #ffd75e, #e8a800); color: #2a0d13; box-shadow: 0 4px 0 #8a6200; }
         .btn-single:active { box-shadow: 0 0px 0 var(--primary-dark); }
-        .btn-pair { background-color: var(--secondary); box-shadow: 0 4px 0 var(--secondary-dark); }
+        .btn-pair { background: linear-gradient(180deg, #e0576f, #a8203c); box-shadow: 0 4px 0 #61101f; }
         .btn-pair:active { box-shadow: 0 0px 0 var(--secondary-dark); }
-        .btn-reset { background-color: var(--gray); box-shadow: 0 4px 0 #57606f; }
+        .btn-reset { background: rgba(255,255,255,0.07); color: #ffe9a8; border: 1px solid color-mix(in srgb, var(--warning) 30%, transparent); box-shadow: 0 4px 0 rgba(0,0,0,0.45); }
         .btn-reset:active { box-shadow: 0 0px 0 #57606f; }
         .btn-group { background-color: var(--purple); box-shadow: 0 4px 0 var(--purple-dark); flex: 1; }
         .btn-group:active { box-shadow: 0 0px 0 var(--purple-dark); }
@@ -167,11 +176,27 @@
         .split-setting .unit { font-weight: 700; color: rgba(255,255,255,0.75); font-size: 0.72rem; white-space: nowrap; }
 
         /* ── RESULT / STAGE ── */
+        /* ── เวทีเกมโชว์ + กรอบหลอดไฟวิ่ง ── */
+        .stage-frame { position: relative; padding: 10px; }
+        .stage-bulbs { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
+        .stage-bulbs i {
+            position: absolute; width: 10px; height: 10px; border-radius: 50%;
+            background: #fff6dc; box-shadow: 0 0 10px var(--warning), 0 0 18px color-mix(in srgb, var(--warning) 55%, transparent);
+            animation: bulbChase 1.25s infinite;
+        }
+        @keyframes bulbChase { 0%, 100% { opacity: 0.25; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1); } }
         .result-box {
-            background: linear-gradient(180deg,rgba(30,39,46,0.9) 0%,rgba(11,23,42,0.9) 100%);
-            border: 4px solid var(--secondary); border-radius: 20px; min-height: 600px; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            box-shadow: 0 0 30px rgba(30,144,255,0.3), inset 0 0 20px rgba(0,0,0,0.8); position: relative; overflow: hidden; padding: 30px;
-            transition: box-shadow 0.3s ease;
+            background: linear-gradient(180deg, rgba(139,21,56,0.32) 0%, rgba(26,10,44,0.94) 55%, rgba(14,5,26,0.96) 100%);
+            border: 3px solid var(--warning); border-radius: 16px; min-height: 600px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: 0 0 34px color-mix(in srgb, var(--warning) 30%, transparent), inset 0 0 70px rgba(0,0,0,0.75); position: relative; overflow: hidden; padding: 30px;
+            transition: box-shadow 0.3s ease; isolation: isolate;
+        }
+        /* แสงสปอตไลต์ในเวที — z-index ติดลบ เพื่อให้อยู่หลังเนื้อหาทุกชนิด ไม่บังผลลัพธ์ */
+        .result-box::before {
+            content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 70%; height: 100%; pointer-events: none; z-index: -1;
+            background: linear-gradient(180deg, rgba(255,244,205,0.13) 0%, transparent 65%);
+            clip-path: polygon(36% 0, 64% 0, 100% 100%, 0% 100%);
         }
         .result-box.charging { animation: chargeGlow 0.75s ease-in-out infinite alternate; }
         @keyframes chargeGlow {
@@ -336,9 +361,11 @@
         @keyframes haloSpin { to { transform: rotate(360deg); } }
         .avatar-halo .avatar { position: relative; margin: 0; width: 175px; height: 175px; z-index: 1; }
         .winner-badge {
-            display: inline-block; background: linear-gradient(90deg, var(--warning), var(--primary));
-            color: #fff; font-weight: 800; font-size: 1.15rem; letter-spacing: 2px; text-transform: uppercase;
-            padding: 7px 22px; border-radius: 20px; margin-bottom: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+            display: inline-block; background: #8b1538;
+            color: #ffe9a8; font-weight: 800; font-size: 1.15rem; letter-spacing: 2px; text-transform: uppercase;
+            padding: 7px 22px; border-radius: 999px; margin-bottom: 6px;
+            border: 1px solid color-mix(in srgb, var(--warning) 55%, transparent);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.45);
         }
 
         /* ── REVEAL FX (แสง/ประกาย ตอนเผยผลลัพธ์) ── */
@@ -393,8 +420,9 @@
         ::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 10px; }
     </style>
 </head>
-<body onload="applyTheme('sunset'); loadAppData()">
+<body onload="applyTheme('showtime'); renderStageBulbs(); loadAppData()">
 
+<div class="spotlight"></div>
 <div class="theme-decor" id="themeDecor"></div>
 
 
@@ -411,9 +439,10 @@
 
     <div class="theme-bar">
         <span class="theme-label">🎨 ธีม:</span>
+        <div class="theme-btn active" data-theme="showtime" title="Showtime" onclick="applyTheme('showtime')"></div>
         <div class="theme-btn"        data-theme="arcade"   title="Arcade"   onclick="applyTheme('arcade')"></div>
         <div class="theme-btn"        data-theme="ocean"    title="Ocean"    onclick="applyTheme('ocean')"></div>
-        <div class="theme-btn active" data-theme="sunset"   title="Sunset"   onclick="applyTheme('sunset')"></div>
+        <div class="theme-btn"        data-theme="sunset"   title="Sunset"   onclick="applyTheme('sunset')"></div>
         <div class="theme-btn"        data-theme="forest"   title="Forest"   onclick="applyTheme('forest')"></div>
         <div class="theme-btn"        data-theme="midnight" title="Midnight" onclick="applyTheme('midnight')"></div>
         <div class="theme-btn"        data-theme="casino"   title="Casino Gold" onclick="applyTheme('casino')"></div>
@@ -503,8 +532,11 @@
         </div>
 
         <div class="result-section">
-            <div id="resultDisplay" class="result-box">
-                <span style="color:#747d8c;font-size:1.8rem;font-weight:600;">รอโหลดระบบ... ⏳</span>
+            <div class="stage-frame">
+                <div class="stage-bulbs" id="stageBulbs"></div>
+                <div id="resultDisplay" class="result-box">
+                    <span style="color:rgba(255,235,180,0.5);font-size:1.8rem;font-weight:600;">รอโหลดระบบ... ⏳</span>
+                </div>
             </div>
         </div>
     </div>
@@ -634,26 +666,30 @@
     // ==========================================
     // helper: สร้างพื้นหลังสว่างมีลายจุด + blob 4 สี
     function lightBG(base, c1, c2, c3, c4) {
-        return `radial-gradient(circle at 12% 18%, ${c1} 0%, transparent 38%),`
-             + `radial-gradient(circle at 88% 12%, ${c2} 0%, transparent 36%),`
-             + `radial-gradient(circle at 78% 88%, ${c3} 0%, transparent 40%),`
-             + `radial-gradient(circle at 18% 85%, ${c4} 0%, transparent 38%),`
-             + `radial-gradient(rgba(80,80,140,0.10) 1.5px, transparent 1.5px)`;
+        return `radial-gradient(ellipse at 50% -10%, rgba(255,244,205,0.16) 0%, transparent 55%),`
+             + `radial-gradient(circle at 12% 18%, ${c1} 0%, transparent 42%),`
+             + `radial-gradient(circle at 88% 12%, ${c2} 0%, transparent 38%),`
+             + `radial-gradient(circle at 78% 88%, ${c3} 0%, transparent 44%),`
+             + `radial-gradient(circle at 18% 85%, ${c4} 0%, transparent 40%),`
+             + `radial-gradient(${c1.replace(/[\d.]+\)$/, '0.07)')} 1.5px, transparent 1.5px)`;
     }
+    // ทุกธีมเป็นโทน "เวทีมืด" ให้แสงสปอตไลต์และหลอดไฟเด่น — เปลี่ยนแค่สีไฟเวที
     const themes = {
-        arcade:   { base:'#eef2ff', blobs:['rgba(255,159,67,0.45)','rgba(46,213,115,0.40)','rgba(30,144,255,0.42)','rgba(155,89,182,0.40)'], primary:'#ff4757',primaryDark:'#c0392b',secondary:'#1e90ff',secondaryDark:'#0984e3',accent:'#2ed573',accentDark:'#27ae60',warning:'#ffa502' },
-        ocean:    { base:'#e6f7ff', blobs:['rgba(0,206,201,0.45)','rgba(116,185,255,0.45)','rgba(9,132,227,0.38)','rgba(85,239,196,0.42)'], primary:'#00cec9',primaryDark:'#00a8a3',secondary:'#0984e3',secondaryDark:'#0652DD',accent:'#00b894',accentDark:'#009975',warning:'#fdcb6e' },
-        sunset:   { base:'#fff0f3', blobs:['rgba(253,121,168,0.45)','rgba(253,203,110,0.50)','rgba(225,112,85,0.40)','rgba(232,67,147,0.38)'], primary:'#e84393',primaryDark:'#c0307a',secondary:'#e17055',secondaryDark:'#c0392b',accent:'#fdcb6e',accentDark:'#e6a817',warning:'#fd79a8' },
-        forest:   { base:'#edfff4', blobs:['rgba(85,239,196,0.50)','rgba(0,184,148,0.42)','rgba(129,236,236,0.45)','rgba(255,234,167,0.50)'], primary:'#00b894',primaryDark:'#009975',secondary:'#00cec9',secondaryDark:'#00a8a3',accent:'#fdcb6e',accentDark:'#e6a817',warning:'#00b894' },
-        midnight: { base:'#f0eeff', blobs:['rgba(162,155,254,0.50)','rgba(253,121,168,0.42)','rgba(108,92,231,0.40)','rgba(255,234,167,0.45)'], primary:'#6c5ce7',primaryDark:'#5341c4',secondary:'#e84393',secondaryDark:'#c0307a',accent:'#a29bfe',accentDark:'#8075e0',warning:'#fdcb6e' },
-        casino:   { base:'#fffbe6', blobs:['rgba(241,196,15,0.50)','rgba(231,76,60,0.42)','rgba(46,204,113,0.42)','rgba(241,196,15,0.45)'], primary:'#e74c3c',primaryDark:'#c0392b',secondary:'#d4ac0d',secondaryDark:'#b8950b',accent:'#27ae60',accentDark:'#1e8449',warning:'#f1c40f' },
-        candy:    { base:'#fff0fa', blobs:['rgba(255,79,163,0.42)','rgba(0,194,203,0.40)','rgba(255,202,58,0.42)','rgba(186,104,255,0.38)'], primary:'#ff4fa3',primaryDark:'#d6266e',secondary:'#00c2cb',secondaryDark:'#009aa1',accent:'#39e5c5',accentDark:'#1fae95',warning:'#ffca3a' },
-        halloween:{ base:'#f3edf7', blobs:['rgba(255,117,24,0.42)','rgba(108,52,131,0.42)','rgba(124,252,0,0.24)','rgba(139,0,0,0.32)'], primary:'#6c3483',primaryDark:'#4a235a',secondary:'#ff7518',secondaryDark:'#c1440e',accent:'#7cfc00',accentDark:'#4b8b02',warning:'#ffb347' },
-        galaxy:   { base:'#05060f', blobs:['rgba(255,46,158,0.35)','rgba(0,229,255,0.30)','rgba(124,77,255,0.35)','rgba(255,215,0,0.16)'], primary:'#ff2e9e',primaryDark:'#b0176d',secondary:'#00e5ff',secondaryDark:'#0091a8',accent:'#7c4dff',accentDark:'#4527a0',warning:'#ffd700' },
+        showtime: { base:'#1a0b2e', blobs:['rgba(139,21,56,0.40)','rgba(245,197,24,0.16)','rgba(139,21,56,0.34)','rgba(94,23,120,0.34)'], primary:'#e0576f',primaryDark:'#8b1538',secondary:'#c9a227',secondaryDark:'#8a6200',accent:'#f5c518',accentDark:'#b08c00',warning:'#f5c518' },
+        arcade:   { base:'#12132a', blobs:['rgba(255,71,87,0.32)','rgba(46,213,115,0.24)','rgba(30,144,255,0.32)','rgba(155,89,182,0.30)'], primary:'#ff4757',primaryDark:'#c0392b',secondary:'#1e90ff',secondaryDark:'#0984e3',accent:'#2ed573',accentDark:'#27ae60',warning:'#ffa502' },
+        ocean:    { base:'#05202e', blobs:['rgba(0,206,201,0.30)','rgba(116,185,255,0.28)','rgba(9,132,227,0.32)','rgba(85,239,196,0.24)'], primary:'#00cec9',primaryDark:'#00a8a3',secondary:'#0984e3',secondaryDark:'#0652DD',accent:'#00b894',accentDark:'#009975',warning:'#fdcb6e' },
+        sunset:   { base:'#2a0f22', blobs:['rgba(253,121,168,0.32)','rgba(253,203,110,0.28)','rgba(225,112,85,0.30)','rgba(232,67,147,0.28)'], primary:'#e84393',primaryDark:'#c0307a',secondary:'#e17055',secondaryDark:'#c0392b',accent:'#fdcb6e',accentDark:'#e6a817',warning:'#fd79a8' },
+        forest:   { base:'#062018', blobs:['rgba(85,239,196,0.28)','rgba(0,184,148,0.30)','rgba(129,236,236,0.24)','rgba(255,234,167,0.20)'], primary:'#00b894',primaryDark:'#009975',secondary:'#00cec9',secondaryDark:'#00a8a3',accent:'#fdcb6e',accentDark:'#e6a817',warning:'#55efc4' },
+        midnight: { base:'#12103a', blobs:['rgba(162,155,254,0.32)','rgba(253,121,168,0.26)','rgba(108,92,231,0.32)','rgba(255,234,167,0.18)'], primary:'#6c5ce7',primaryDark:'#5341c4',secondary:'#e84393',secondaryDark:'#c0307a',accent:'#a29bfe',accentDark:'#8075e0',warning:'#fdcb6e' },
+        casino:   { base:'#1d1004', blobs:['rgba(241,196,15,0.28)','rgba(231,76,60,0.30)','rgba(46,204,113,0.22)','rgba(241,196,15,0.26)'], primary:'#e74c3c',primaryDark:'#c0392b',secondary:'#d4ac0d',secondaryDark:'#b8950b',accent:'#27ae60',accentDark:'#1e8449',warning:'#f1c40f' },
+        candy:    { base:'#2a0a24', blobs:['rgba(255,79,163,0.32)','rgba(0,194,203,0.26)','rgba(255,202,58,0.26)','rgba(186,104,255,0.28)'], primary:'#ff4fa3',primaryDark:'#d6266e',secondary:'#00c2cb',secondaryDark:'#009aa1',accent:'#39e5c5',accentDark:'#1fae95',warning:'#ffca3a' },
+        halloween:{ base:'#1a0c22', blobs:['rgba(255,117,24,0.32)','rgba(108,52,131,0.34)','rgba(124,252,0,0.16)','rgba(139,0,0,0.30)'], primary:'#6c3483',primaryDark:'#4a235a',secondary:'#ff7518',secondaryDark:'#c1440e',accent:'#7cfc00',accentDark:'#4b8b02',warning:'#ffb347' },
+        galaxy:   { base:'#05060f', blobs:['rgba(255,46,158,0.32)','rgba(0,229,255,0.26)','rgba(124,77,255,0.32)','rgba(255,215,0,0.16)'], primary:'#ff2e9e',primaryDark:'#b0176d',secondary:'#00e5ff',secondaryDark:'#0091a8',accent:'#7c4dff',accentDark:'#4527a0',warning:'#ffd700' },
     };
 
     // ── ไอคอนลอยพื้นหลังประจำแต่ละธีม ──
     const THEME_DECOR = {
+        showtime:  ['🎭','🎬','🏆','🎟️'],
         arcade:    ['🕹️','👾','🎮','🪙'],
         ocean:     ['🐠','🐟','🫧','⭐'],
         sunset:    ['🌅','🌴','🦩','☀️'],
@@ -665,6 +701,31 @@
         galaxy:    ['🌌','🪐','🚀','⭐'],
     };
     const DECOR_COUNT = 16;
+    // หลอดไฟวิ่งรอบเวที — วางรอบขอบกรอบ แล้วไล่จังหวะกะพริบให้ดูเหมือนไฟวิ่ง
+    function renderStageBulbs() {
+        const wrap = document.getElementById('stageBulbs');
+        if (!wrap) return;
+        const perSide = 9, perEnd = 5;
+        let html = '', i = 0;
+        for (let n = 0; n < perSide; n++) {
+            const p = (n / (perSide - 1)) * 100;
+            html += `<i style="top:-5px;left:calc(${p}% - 5px);animation-delay:${(i++ * 0.1).toFixed(2)}s"></i>`;
+        }
+        for (let n = 1; n < perEnd - 1; n++) {
+            const p = (n / (perEnd - 1)) * 100;
+            html += `<i style="right:-5px;top:calc(${p}% - 5px);animation-delay:${(i++ * 0.1).toFixed(2)}s"></i>`;
+        }
+        for (let n = perSide - 1; n >= 0; n--) {
+            const p = (n / (perSide - 1)) * 100;
+            html += `<i style="bottom:-5px;left:calc(${p}% - 5px);animation-delay:${(i++ * 0.1).toFixed(2)}s"></i>`;
+        }
+        for (let n = perEnd - 2; n > 0; n--) {
+            const p = (n / (perEnd - 1)) * 100;
+            html += `<i style="left:-5px;top:calc(${p}% - 5px);animation-delay:${(i++ * 0.1).toFixed(2)}s"></i>`;
+        }
+        wrap.innerHTML = html;
+    }
+
     function renderDecor(name) {
         const decor = document.getElementById('themeDecor');
         const emojis = THEME_DECOR[name];
