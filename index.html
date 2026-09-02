@@ -266,54 +266,6 @@
         @keyframes countdownPop { 0% { transform: scale(1.6); opacity: 0.3; } 100% { transform: scale(1); opacity: 1; } }
         .countdown-label { color: rgba(255,255,255,0.7); font-weight: 700; font-size: 1.1rem; letter-spacing: 1px; }
 
-        /* ── SINGLE-DRAW VARIANT: SPIN WHEEL ── */
-        .wheel-stage { display: flex; align-items: center; justify-content: center; width: 100%; }
-        .wheel-wrap { position: relative; width: 340px; height: 340px; max-width: 82vw; max-height: 82vw; }
-        .wheel {
-            position: relative; width: 100%; height: 100%; border-radius: 50%;
-            border: 6px solid var(--warning);
-            box-shadow: 0 0 34px color-mix(in srgb, var(--warning) 50%, transparent), inset 0 0 40px rgba(0,0,0,0.5);
-            transition: transform 4.2s cubic-bezier(.15,.9,.2,1);
-        }
-        .wheel-label {
-            position: absolute; transform: translate(-50%,-50%); pointer-events: none;
-            font-size: 0.82rem; font-weight: 800; color: #fff; white-space: nowrap;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.9);
-        }
-        .wheel-ptr {
-            position: absolute; top: -20px; left: 50%; transform: translateX(-50%); z-index: 3;
-            font-size: 2.1rem; filter: drop-shadow(0 3px 5px rgba(0,0,0,0.8));
-        }
-        .wheel-hub {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 2;
-            width: 76px; height: 76px; border-radius: 50%; background: #1a0b2e;
-            border: 4px solid var(--warning); display: flex; align-items: center; justify-content: center;
-            font-size: 1.9rem; box-shadow: 0 0 18px rgba(0,0,0,0.7);
-        }
-
-        /* ── SINGLE-DRAW VARIANT: SPOTLIGHT HUNT ── */
-        .hunt-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 8px; width: 100%; max-height: 100%; overflow-y: auto; padding: 4px;
-        }
-        .hunt-cell {
-            padding: 10px 6px; border-radius: 9px; text-align: center;
-            background: rgba(255,255,255,0.05); border: 1px solid color-mix(in srgb, var(--warning) 22%, transparent);
-            font-size: 0.9rem; font-weight: 600; color: rgba(255,235,180,0.7);
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: all 0.1s;
-        }
-        .hunt-cell.lit {
-            background: color-mix(in srgb, var(--warning) 30%, transparent); border-color: var(--warning);
-            color: #fff; transform: scale(1.08);
-            box-shadow: 0 0 18px color-mix(in srgb, var(--warning) 60%, transparent);
-        }
-        .hunt-cell.won {
-            background: var(--primary-dark); border-color: var(--warning); color: #fff; font-weight: 900;
-            transform: scale(1.16); box-shadow: 0 0 30px var(--warning);
-            animation: huntWin 0.45s ease infinite alternate;
-        }
-        @keyframes huntWin { from { transform: scale(1.12); } to { transform: scale(1.2); } }
-
         /* ── SINGLE-DRAW VARIANT: CARD FLIP ── */
         .flip-stage { display: flex; justify-content: center; align-items: center; width: 100%; perspective: 800px; }
         .flip-card { width: 320px; max-width: 85vw; height: 160px; }
@@ -1093,94 +1045,11 @@
         }, 180);
     }
 
-    // สไตล์ 4: วงล้อเสี่ยงโชค — หมุนแล้วชะลอจนเข็มชี้หยุดที่ target
-    function animWheel(names, target, myToken, onDone) {
-        const display = document.getElementById('resultDisplay');
-        const SEGS = 8;
-        const others = shuffle(names.filter(n => n !== target)).slice(0, SEGS - 1);
-        const pool = shuffle([target, ...others]);
-        while (pool.length < SEGS) pool.push(names[Math.floor(Math.random()*names.length)]);
-        const winIdx = pool.indexOf(target);
-        const segColors = ['var(--primary-dark)','var(--primary)','var(--warning)','var(--accent-dark)'];
-        const seg = 360 / SEGS;
-
-        const cg = pool.map((_, i) => `${segColors[i % segColors.length]} ${i*seg}deg ${(i+1)*seg}deg`).join(',');
-        const labels = pool.map((n, i) => {
-            const a = (i*seg + seg/2) * Math.PI/180;
-            const x = 50 + Math.sin(a)*34, y = 50 - Math.cos(a)*34;
-            const short = String(n).replace(/^นาย|^นางสาว|^นาง|^เด็กชาย|^เด็กหญิง/, '');
-            return `<span class="wheel-label" style="left:${x}%;top:${y}%">${escHtml(short.length > 9 ? short.slice(0,8)+'…' : short)}</span>`;
-        }).join('');
-
-        display.innerHTML = `<div class="wheel-stage">
-                                <div class="wheel-wrap">
-                                    <div class="wheel-ptr">🔻</div>
-                                    <div class="wheel" id="drawWheel" style="background:conic-gradient(${cg})">${labels}</div>
-                                    <div class="wheel-hub">🎯</div>
-                                </div>
-                             </div>`;
-
-        const wheelEl = document.getElementById('drawWheel');
-        const targetDeg = 360*5 + (360 - (winIdx*seg + seg/2));
-        requestAnimationFrame(() => {
-            if (myToken !== drawToken || !wheelEl) return;
-            wheelEl.style.transform = `rotate(${targetDeg}deg)`;
-        });
-        let tickDelay = 70;
-        (function tickLoop(elapsed) {
-            if (myToken !== drawToken || elapsed > 4000) return;
-            tickSound();
-            tickDelay *= 1.12;
-            setTimeout(() => tickLoop(elapsed + tickDelay), tickDelay);
-        })(0);
-
-        setTimeout(() => { if (myToken === drawToken) onDone(); }, 4600);
-    }
-
-    // สไตล์ 5: สปอตไลต์ไล่ล่า — โชว์ชื่อทั้งห้อง ไฟกระโดดจนหยุดที่ target
-    function animSpotlightHunt(names, target, myToken, onDone) {
-        const display = document.getElementById('resultDisplay');
-        display.innerHTML = `<div class="hunt-grid" id="huntGrid">`
-            + names.map(n => `<div class="hunt-cell">${escHtml(n.length > 14 ? n.slice(0,13)+'…' : n)}</div>`).join('')
-            + `</div>`;
-
-        const grid = document.getElementById('huntGrid');
-        if (!grid) { onDone(); return; }
-        const cells = [...grid.children];
-        const winIdx = Math.max(0, names.indexOf(target));
-
-        let i = Math.floor(Math.random() * cells.length);
-        let delay = 65, steps = 0;
-        // +1 เพราะไฮไลต์ก่อนแล้วค่อยขยับ ก้าวสุดท้ายจึงตกที่ i0+total-1
-        const extra = ((winIdx - i) % cells.length + cells.length) % cells.length;
-        const total = cells.length * 2 + extra + 1;
-
-        (function hop() {
-            if (myToken !== drawToken) return;
-            cells.forEach(c => c.classList.remove('lit'));
-            const cur = cells[i % cells.length];
-            if (cur) cur.classList.add('lit');
-            tickSound();
-            steps++;
-            if (steps >= total) {
-                cells.forEach(c => c.classList.remove('lit'));
-                if (cur) cur.classList.add('won');
-                setTimeout(() => { if (myToken === drawToken) onDone(); }, 800);
-                return;
-            }
-            i++;
-            if (steps > total - 10) delay *= 1.3;   // ชะลอช่วงท้ายให้ลุ้น
-            setTimeout(hop, delay);
-        })();
-    }
-
     // ── ตารางน้ำหนักของสไตล์ (แก้ตัวเลขตรงนี้ถ้าอยากให้แบบไหนขึ้นบ่อย/น้อยลง) ──
     const DRAW_STYLES = [
-        { fn: animSpotlightHunt, weight: 27 },   // สปอตไลต์ไล่ล่า
-        { fn: animWheel,         weight: 25 },   // วงล้อเสี่ยงโชค
-        { fn: animShuffle,       weight: 17 },   // สับชื่อเร็ว
-        { fn: animCountdown,     weight: 16 },   // นับ 3-2-1
-        { fn: animCardFlip,      weight: 15 },   // การ์ดพลิก
+        { fn: animShuffle,       weight: 34 },   // สับชื่อเร็ว
+        { fn: animCountdown,     weight: 33 },   // นับ 3-2-1
+        { fn: animCardFlip,      weight: 33 },   // การ์ดพลิก
     ];
     const FAKEOUT_CHANCE = 0.7;    // โอกาสที่รอบนั้นจะ "แกล้ง" (ใช้ได้กับทุกสไตล์)
     const DOUBLE_FAKE_CHANCE = 0.4; // ในรอบที่แกล้ง มีโอกาสแกล้งซ้อน 2 ชั้น
