@@ -266,6 +266,54 @@
         @keyframes countdownPop { 0% { transform: scale(1.6); opacity: 0.3; } 100% { transform: scale(1); opacity: 1; } }
         .countdown-label { color: rgba(255,255,255,0.7); font-weight: 700; font-size: 1.1rem; letter-spacing: 1px; }
 
+        /* ── SINGLE-DRAW VARIANT: SPIN WHEEL ── */
+        .wheel-stage { display: flex; align-items: center; justify-content: center; width: 100%; }
+        .wheel-wrap { position: relative; width: 340px; height: 340px; max-width: 82vw; max-height: 82vw; }
+        .wheel {
+            position: relative; width: 100%; height: 100%; border-radius: 50%;
+            border: 6px solid var(--warning);
+            box-shadow: 0 0 34px color-mix(in srgb, var(--warning) 50%, transparent), inset 0 0 40px rgba(0,0,0,0.5);
+            transition: transform 4.2s cubic-bezier(.15,.9,.2,1);
+        }
+        .wheel-label {
+            position: absolute; transform: translate(-50%,-50%); pointer-events: none;
+            font-size: 0.82rem; font-weight: 800; color: #fff; white-space: nowrap;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+        }
+        .wheel-ptr {
+            position: absolute; top: -20px; left: 50%; transform: translateX(-50%); z-index: 3;
+            font-size: 2.1rem; filter: drop-shadow(0 3px 5px rgba(0,0,0,0.8));
+        }
+        .wheel-hub {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 2;
+            width: 76px; height: 76px; border-radius: 50%; background: #1a0b2e;
+            border: 4px solid var(--warning); display: flex; align-items: center; justify-content: center;
+            font-size: 1.9rem; box-shadow: 0 0 18px rgba(0,0,0,0.7);
+        }
+
+        /* ── SINGLE-DRAW VARIANT: SPOTLIGHT HUNT ── */
+        .hunt-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px; width: 100%; max-height: 100%; overflow-y: auto; padding: 4px;
+        }
+        .hunt-cell {
+            padding: 10px 6px; border-radius: 9px; text-align: center;
+            background: rgba(255,255,255,0.05); border: 1px solid color-mix(in srgb, var(--warning) 22%, transparent);
+            font-size: 0.9rem; font-weight: 600; color: rgba(255,235,180,0.7);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: all 0.1s;
+        }
+        .hunt-cell.lit {
+            background: color-mix(in srgb, var(--warning) 30%, transparent); border-color: var(--warning);
+            color: #fff; transform: scale(1.08);
+            box-shadow: 0 0 18px color-mix(in srgb, var(--warning) 60%, transparent);
+        }
+        .hunt-cell.won {
+            background: var(--primary-dark); border-color: var(--warning); color: #fff; font-weight: 900;
+            transform: scale(1.16); box-shadow: 0 0 30px var(--warning);
+            animation: huntWin 0.45s ease infinite alternate;
+        }
+        @keyframes huntWin { from { transform: scale(1.12); } to { transform: scale(1.2); } }
+
         /* ── SINGLE-DRAW VARIANT: CARD FLIP ── */
         .flip-stage { display: flex; justify-content: center; align-items: center; width: 100%; perspective: 800px; }
         .flip-card { width: 320px; max-width: 85vw; height: 160px; }
@@ -938,13 +986,7 @@
         drawToken++;
 
         if (mode === 'single') {
-            // สุ่มรูปแบบแอนิเมชันการสุ่ม 1 คน — เด็กๆ ชอบลูกเล่นแกล้งสลับชื่อมาก ให้ขึ้นบ่อยๆ (75%) ที่เหลือสลับ 3 แบบเดิมเพื่อความหลากหลาย
-            if (Math.random() < 0.75) {
-                fakeoutDraw(names);
-            } else {
-                const otherStyles = [quickShuffleSingle, countdownDraw, cardFlipDraw];
-                otherStyles[Math.floor(Math.random() * otherStyles.length)](names);
-            }
+            startSingleDraw(names);
         } else if (mode === 'team') {
             hideUndoBar(); lastDraw = null;   // กันแถบ undo ค้างจากการสุ่มรอบก่อน
             startTeamDraw(names);
@@ -975,15 +1017,16 @@
     }
 
     // ==========================================
-    // 🎲 สุ่ม 1 คน — 3 รูปแบบแอนิเมชันสลับกันไปแบบสุ่ม (ไม่ล็อกแบบเดียว)
+    // 🎲 สุ่ม 1 คน
+    // แยก "แอนิเมชัน" ออกจาก "ใครคือคำตอบ" — แต่ละสไตล์แค่วิ่งไปจบที่ชื่อ target ที่สั่ง
+    // แล้วเรียก onDone() ทำให้ทุกสไตล์เอาไปแกล้ง (ลงที่ชื่อปลอมก่อน) ได้เหมือนกันหมด
     // ==========================================
-    function quickShuffleSingle(names) {
-        isSpinning = true;
-        const myToken = drawToken;
+
+    // สไตล์ 1: สับชื่อเร็วๆ
+    function animShuffle(names, target, myToken, onDone) {
         const display = document.getElementById('resultDisplay');
         display.classList.add('animate-shake');
-        display.classList.add('charging');
-        let interval = setInterval(() => {
+        const interval = setInterval(() => {
             if (myToken !== drawToken) { clearInterval(interval); return; }
             const t = names[Math.floor(Math.random()*names.length)];
             tickSound();
@@ -993,20 +1036,14 @@
         setTimeout(() => {
             clearInterval(interval);
             display.classList.remove('animate-shake');
-            if (myToken !== drawToken) return;   // ถูกยกเลิกกลางคัน (เปลี่ยนห้อง/รีเซ็ต)
-            isSpinning = false;
-            const winner = pickWeightedWinner(names);
-            revealWinner(winner, names);
+            if (myToken !== drawToken) return;
+            onDone();
         }, 1800);
     }
 
-    // แบบที่ 2: นับถอยหลัง 3-2-1 แล้วเผยชื่อ
-    function countdownDraw(names) {
-        isSpinning = true;
-        const myToken = drawToken;
+    // สไตล์ 2: นับถอยหลัง 3-2-1
+    function animCountdown(names, target, myToken, onDone) {
         const display = document.getElementById('resultDisplay');
-        display.classList.add('charging');
-        const winner = pickWeightedWinner(names);
         let count = 3;
         display.innerHTML = `<div class="countdown-stage">
                                 <div class="countdown-num countdown-pop" id="countdownNum">${count}</div>
@@ -1026,19 +1063,14 @@
                 }
             } else {
                 clearInterval(timer);
-                isSpinning = false;
-                revealWinner(winner, names);
+                onDone();
             }
         }, 650);
     }
 
-    // แบบที่ 3: การ์ดพลิกสลับชื่อไปเรื่อยๆ แล้วหยุดที่ผู้ชนะ
-    function cardFlipDraw(names) {
-        isSpinning = true;
-        const myToken = drawToken;
+    // สไตล์ 3: การ์ดพลิกสลับชื่อ แล้วหยุดที่ target
+    function animCardFlip(names, target, myToken, onDone) {
         const display = document.getElementById('resultDisplay');
-        display.classList.add('charging');
-        const winner = pickWeightedWinner(names);
         display.innerHTML = `<div class="flip-stage">
                                 <div class="flip-card" id="flipCard">
                                     <div class="flip-card-face" id="flipFace">${escHtml(names[Math.floor(Math.random()*names.length)])}</div>
@@ -1053,60 +1085,151 @@
             const card = document.getElementById('flipCard');
             const face = document.getElementById('flipFace');
             if (card) { card.classList.remove('flip-anim'); void card.offsetWidth; card.classList.add('flip-anim'); }
-            if (face) face.textContent = flips >= maxFlips ? winner : names[Math.floor(Math.random()*names.length)];
+            if (face) face.textContent = flips >= maxFlips ? target : names[Math.floor(Math.random()*names.length)];
             if (flips >= maxFlips) {
                 clearInterval(interval);
-                setTimeout(() => {
-                    if (myToken !== drawToken) return;
-                    isSpinning = false; revealWinner(winner, names);
-                }, 450);
+                setTimeout(() => { if (myToken === drawToken) onDone(); }, 450);
             }
         }, 180);
     }
 
-    // แบบที่ 4: แกล้งเผยชื่อ "ปลอม" ก่อน ทำท่าเหมือนจบแล้ว แล้วสลับเป็นผู้ชนะจริงแบบไม่ทันตั้งตัว
-    // มีลูกเล่นตอนแกล้งสลับ 3 แบบ (สุ่มทุกครั้ง) และบางครั้งแกล้งซ้อน 2 รอบให้ลุ้นกว่าเดิม
-    const FAKEOUT_TWISTS = ['shake', 'stamp', 'glitch'];
+    // สไตล์ 4: วงล้อเสี่ยงโชค — หมุนแล้วชะลอจนเข็มชี้หยุดที่ target
+    function animWheel(names, target, myToken, onDone) {
+        const display = document.getElementById('resultDisplay');
+        const SEGS = 8;
+        const others = shuffle(names.filter(n => n !== target)).slice(0, SEGS - 1);
+        const pool = shuffle([target, ...others]);
+        while (pool.length < SEGS) pool.push(names[Math.floor(Math.random()*names.length)]);
+        const winIdx = pool.indexOf(target);
+        const segColors = ['var(--primary-dark)','var(--primary)','var(--warning)','var(--accent-dark)'];
+        const seg = 360 / SEGS;
 
-    function fakeoutDraw(names) {
+        const cg = pool.map((_, i) => `${segColors[i % segColors.length]} ${i*seg}deg ${(i+1)*seg}deg`).join(',');
+        const labels = pool.map((n, i) => {
+            const a = (i*seg + seg/2) * Math.PI/180;
+            const x = 50 + Math.sin(a)*34, y = 50 - Math.cos(a)*34;
+            const short = String(n).replace(/^นาย|^นางสาว|^นาง|^เด็กชาย|^เด็กหญิง/, '');
+            return `<span class="wheel-label" style="left:${x}%;top:${y}%">${escHtml(short.length > 9 ? short.slice(0,8)+'…' : short)}</span>`;
+        }).join('');
+
+        display.innerHTML = `<div class="wheel-stage">
+                                <div class="wheel-wrap">
+                                    <div class="wheel-ptr">🔻</div>
+                                    <div class="wheel" id="drawWheel" style="background:conic-gradient(${cg})">${labels}</div>
+                                    <div class="wheel-hub">🎯</div>
+                                </div>
+                             </div>`;
+
+        const wheelEl = document.getElementById('drawWheel');
+        const targetDeg = 360*5 + (360 - (winIdx*seg + seg/2));
+        requestAnimationFrame(() => {
+            if (myToken !== drawToken || !wheelEl) return;
+            wheelEl.style.transform = `rotate(${targetDeg}deg)`;
+        });
+        let tickDelay = 70;
+        (function tickLoop(elapsed) {
+            if (myToken !== drawToken || elapsed > 4000) return;
+            tickSound();
+            tickDelay *= 1.12;
+            setTimeout(() => tickLoop(elapsed + tickDelay), tickDelay);
+        })(0);
+
+        setTimeout(() => { if (myToken === drawToken) onDone(); }, 4600);
+    }
+
+    // สไตล์ 5: สปอตไลต์ไล่ล่า — โชว์ชื่อทั้งห้อง ไฟกระโดดจนหยุดที่ target
+    function animSpotlightHunt(names, target, myToken, onDone) {
+        const display = document.getElementById('resultDisplay');
+        display.innerHTML = `<div class="hunt-grid" id="huntGrid">`
+            + names.map(n => `<div class="hunt-cell">${escHtml(n.length > 14 ? n.slice(0,13)+'…' : n)}</div>`).join('')
+            + `</div>`;
+
+        const grid = document.getElementById('huntGrid');
+        if (!grid) { onDone(); return; }
+        const cells = [...grid.children];
+        const winIdx = Math.max(0, names.indexOf(target));
+
+        let i = Math.floor(Math.random() * cells.length);
+        let delay = 65, steps = 0;
+        // +1 เพราะไฮไลต์ก่อนแล้วค่อยขยับ ก้าวสุดท้ายจึงตกที่ i0+total-1
+        const extra = ((winIdx - i) % cells.length + cells.length) % cells.length;
+        const total = cells.length * 2 + extra + 1;
+
+        (function hop() {
+            if (myToken !== drawToken) return;
+            cells.forEach(c => c.classList.remove('lit'));
+            const cur = cells[i % cells.length];
+            if (cur) cur.classList.add('lit');
+            tickSound();
+            steps++;
+            if (steps >= total) {
+                cells.forEach(c => c.classList.remove('lit'));
+                if (cur) cur.classList.add('won');
+                setTimeout(() => { if (myToken === drawToken) onDone(); }, 800);
+                return;
+            }
+            i++;
+            if (steps > total - 10) delay *= 1.3;   // ชะลอช่วงท้ายให้ลุ้น
+            setTimeout(hop, delay);
+        })();
+    }
+
+    // ── ตารางน้ำหนักของสไตล์ (แก้ตัวเลขตรงนี้ถ้าอยากให้แบบไหนขึ้นบ่อย/น้อยลง) ──
+    const DRAW_STYLES = [
+        { fn: animSpotlightHunt, weight: 27 },   // สปอตไลต์ไล่ล่า
+        { fn: animWheel,         weight: 25 },   // วงล้อเสี่ยงโชค
+        { fn: animShuffle,       weight: 17 },   // สับชื่อเร็ว
+        { fn: animCountdown,     weight: 16 },   // นับ 3-2-1
+        { fn: animCardFlip,      weight: 15 },   // การ์ดพลิก
+    ];
+    const FAKEOUT_CHANCE = 0.7;    // โอกาสที่รอบนั้นจะ "แกล้ง" (ใช้ได้กับทุกสไตล์)
+    const DOUBLE_FAKE_CHANCE = 0.4; // ในรอบที่แกล้ง มีโอกาสแกล้งซ้อน 2 ชั้น
+
+    function pickDrawStyle() {
+        const total = DRAW_STYLES.reduce((s, x) => s + x.weight, 0);
+        let r = Math.random() * total;
+        for (const s of DRAW_STYLES) { r -= s.weight; if (r <= 0) return s.fn; }
+        return DRAW_STYLES[DRAW_STYLES.length - 1].fn;
+    }
+
+    // ตัวคุมการสุ่ม 1 คน: เลือกผู้ชนะจริง → เลือกสไตล์ → ตัดสินใจว่าจะแกล้งไหม
+    function startSingleDraw(names) {
         isSpinning = true;
         const myToken = drawToken;
         const display = document.getElementById('resultDisplay');
-        display.classList.add('animate-shake');
         display.classList.add('charging');
 
         const winner = pickWeightedWinner(names);
+        const style = pickDrawStyle();
         const decoyPool = names.filter(n => n !== winner);
-        // ถ้าไม่มีชื่ออื่นให้แกล้ง (เหลือคนเดียว) ข้ามไปเผยผลจริงเลย ไม่ต้องหลอก
-        if (decoyPool.length === 0) {
-            display.classList.remove('animate-shake', 'charging');
+        const wantFake = decoyPool.length > 0 && Math.random() < FAKEOUT_CHANCE;
+
+        const finish = () => {
+            if (myToken !== drawToken) return;
+            display.classList.remove('charging');
             isSpinning = false;
             revealWinner(winner, names);
+        };
+
+        if (!wantFake) {
+            style(names, winner, myToken, finish);
             return;
         }
-        // ปกติแกล้ง 1 รอบ แต่ถ้ามีคนพอ บางครั้ง (30%) จะแกล้งซ้อน 2 รอบ
-        const shuffledDecoys = shuffle([...decoyPool]);
-        const decoys = (decoyPool.length >= 2 && Math.random() < 0.4)
-            ? [shuffledDecoys[0], shuffledDecoys[1]]
-            : [shuffledDecoys[0]];
 
-        let interval = setInterval(() => {
-            if (myToken !== drawToken) { clearInterval(interval); return; }
-            const t = names[Math.floor(Math.random()*names.length)];
-            tickSound();
-            display.innerHTML = `<img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(t)}&backgroundColor=b6e3f4">
-                                 <div class="winner-name" style="font-size:3rem;">${escHtml(t)}</div>`;
-        }, 70);
-
-        setTimeout(() => {
-            clearInterval(interval);
-            display.classList.remove('animate-shake');
+        // โหมดแกล้ง: ให้แอนิเมชันไปจบที่ "ชื่อปลอม" ก่อน แล้วค่อยพลิก
+        const sd = shuffle([...decoyPool]);
+        const decoys = (decoyPool.length >= 2 && Math.random() < DOUBLE_FAKE_CHANCE)
+            ? [sd[0], sd[1]] : [sd[0]];
+        style(names, decoys[0], myToken, () => {
             if (myToken !== drawToken) return;
             showFakeoutRound(decoys, 0, winner, names, myToken);
-        }, 1800);
+        });
     }
 
-    // แสดงผู้ชนะ "ปลอม" 1 รอบ (อาจมีหลายรอบถ้าแกล้งซ้อน) แล้วเรียกตัวเองต่อหรือเผยผลจริงเมื่อครบ
+    // ลูกเล่นตอนแกล้งสลับ 3 แบบ (สุ่มทุกครั้ง)
+    const FAKEOUT_TWISTS = ['shake', 'stamp', 'glitch'];
+
+    // แสดงผู้ชนะ "ปลอม" 1 รอบ แล้วพลิกไปรอบถัดไป หรือเผยผู้ชนะจริงเมื่อครบ
     function showFakeoutRound(decoys, idx, winner, names, myToken) {
         if (myToken !== drawToken) return;
         const display = document.getElementById('resultDisplay');
@@ -1134,7 +1257,7 @@
         }, 1300);
     }
 
-    // เล่นเอฟเฟกต์ "แกล้งสลับ" 1 แบบ (สุ่มจาก 3 แบบ) แล้วเรียก done() เมื่อจบ
+    // เล่นเอฟเฟกต์ "แกล้งสลับ" 1 แบบ แล้วเรียก done() เมื่อจบ
     function playFakeoutTwist(style, done) {
         const display = document.getElementById('resultDisplay');
         if (style === 'stamp') {
