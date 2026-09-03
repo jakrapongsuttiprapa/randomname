@@ -130,11 +130,11 @@
             100% { background-position: 0% 0%; }
         }
         /* ── ICON TOGGLES (ปุ่มไอคอนแทน checkbox ยาว) ── */
-        .toggle-row { display: flex; gap: 8px; justify-content: center; }
+        .toggle-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
         .icon-toggle {
-            flex: 1; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 6px;
+            flex: 1 1 0; min-width: 72px; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 5px;
             background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.12);
-            border-radius: 12px; padding: 7px 6px; cursor: pointer; transition: all 0.25s;
+            border-radius: 12px; padding: 7px 4px; cursor: pointer; transition: all 0.25s;
             position: relative; overflow: hidden; user-select: none;
         }
         .icon-toggle .ic { font-size: 1.15rem; filter: grayscale(0.6) opacity(0.55); transition: 0.25s; }
@@ -482,12 +482,16 @@
 
             <div class="toggle-row">
                 <input type="checkbox" id="challengeMode" hidden>
+                <input type="checkbox" id="fakeoutMode" checked hidden>
                 <input type="checkbox" id="soundMode" checked hidden>
                 <div class="icon-toggle" data-target="challengeMode" onclick="toggleIcon(this)" title="โหมดสุ่มคำถาม / ภารกิจ">
                     <span class="ic">🎯</span><span class="state">OFF</span>
                 </div>
                 <div class="icon-toggle strict" id="fairnessToggle" onclick="cycleFairnessMode()" title="วิธีสุ่มไม่ให้ซ้ำ: แตะเพื่อสลับโหมด">
                     <span class="ic">🚫</span><span class="state">STRICT</span>
+                </div>
+                <div class="icon-toggle on" data-target="fakeoutMode" onclick="toggleIcon(this)" title="ลูกเล่นแกล้งสลับชื่อ — ปิดไว้ถ้าอยากสุ่มเร็วๆ">
+                    <span class="ic">🎭</span><span class="state">ON</span>
                 </div>
                 <div class="icon-toggle on" data-target="soundMode" onclick="toggleIcon(this)" title="เสียง &amp; เอฟเฟกต์">
                     <span class="ic">🔊</span><span class="state">ON</span>
@@ -576,6 +580,7 @@
         if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     }
     function soundOn() { return document.getElementById('soundMode').checked; }
+    function fakeoutOn() { const el = document.getElementById('fakeoutMode'); return !el || el.checked; }
 
     // ปุ่มไอคอน toggle (แทน checkbox ยาวๆ)
     function toggleIcon(el) {
@@ -1071,7 +1076,7 @@
         const winner = pickWeightedWinner(names);
         const style = pickDrawStyle();
         const decoyPool = names.filter(n => n !== winner);
-        const wantFake = decoyPool.length > 0 && Math.random() < FAKEOUT_CHANCE;
+        const wantFake = decoyPool.length > 0 && fakeoutOn() && Math.random() < FAKEOUT_CHANCE;
 
         const finish = () => {
             if (myToken !== drawToken) return;
