@@ -188,6 +188,14 @@
             font-size: 0.78rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
             color: color-mix(in srgb, var(--warning) 88%, #fff);
         }
+        .refresh-btn {
+            background: rgba(0,0,0,0.35); border: 1px solid color-mix(in srgb, var(--warning) 45%, transparent);
+            color: #ffe9a8; font-family: 'Kanit', sans-serif; font-weight: 700; font-size: 0.68rem;
+            letter-spacing: 0.5px; padding: 3px 10px; border-radius: 999px; cursor: pointer; text-transform: none;
+            order: 3; transition: 0.2s; white-space: nowrap;
+        }
+        .refresh-btn:hover { background: rgba(255,255,255,0.1); }
+        .refresh-btn:disabled { opacity: 0.55; cursor: progress; }
         .panel-head::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, color-mix(in srgb, var(--warning) 45%, transparent), transparent); }
         select, textarea, input[type="number"] {
             width: 100%; padding: 12px; border-radius: 12px; font-family: 'Kanit', sans-serif; font-size: 1.1rem; font-weight: 600;
@@ -276,6 +284,7 @@
         .stage-frame::after {
             content: ''; position: absolute; inset: 6px; border-radius: 18px; pointer-events: none;
             box-shadow: 0 0 52px 6px var(--warning); opacity: 0; z-index: 5;
+            will-change: opacity;
         }
         .stage-frame:has(.result-box.charging)::after { animation: chargePulse 0.85s ease-in-out infinite alternate; }
         @keyframes chargePulse { from { opacity: 0.18; } to { opacity: 0.85; } }
@@ -306,6 +315,55 @@
         .stage-msg.warn, .stage-msg.ok { color: rgba(255,235,180,0.8); }
         .stage-msg.idle { color: rgba(255,235,180,0.55); font-size: 1.5rem; font-weight: 600; }
 
+        /* ══ อลังการแบบไม่กินแรง: ใช้ transform/opacity เท่านั้น ══ */
+
+        /* 1) ลำแสงสปอตไลต์ส่ายช้าๆ — หมุนอย่างเดียว ไม่ repaint */
+        .spotlight { transform-origin: 50% 0; animation: swayBeam 11s ease-in-out infinite alternate; will-change: transform; }
+        @keyframes swayBeam { from { transform: translateX(-50%) rotate(-3.2deg); } to { transform: translateX(-50%) rotate(3.2deg); } }
+
+        /* 2) แสงกวาดผ่านหัวเรื่อง — แถบไฟเลื่อนขวาไปซ้าย */
+        .header-wrap { overflow: hidden; }
+        .header-wrap::before {
+            content: ''; position: absolute; top: -10%; left: -30%; width: 22%; height: 130%;
+            background: linear-gradient(100deg, transparent, rgba(255,246,220,0.16), transparent);
+            transform: skewX(-18deg) translateX(0); pointer-events: none; z-index: 2;
+            animation: titleSweep 6.5s ease-in-out infinite; will-change: transform;
+        }
+        @keyframes titleSweep {
+            0%, 62% { transform: skewX(-18deg) translateX(0); }
+            100%    { transform: skewX(-18deg) translateX(620%); }
+        }
+
+        /* 3) เวทีหายใจ — ไฟรอบเวทีสว่าง-หรี่ ด้วย opacity ล้วน */
+        .stage-frame::before {
+            content: ''; position: absolute; inset: 4px; border-radius: 20px; pointer-events: none; z-index: 0;
+            box-shadow: 0 0 46px 2px color-mix(in srgb, var(--warning) 42%, transparent);
+            opacity: 0.35; animation: stageBreathe 4.5s ease-in-out infinite alternate;
+            will-change: opacity;
+        }
+        @keyframes stageBreathe { from { opacity: 0.22; } to { opacity: 0.6; } }
+        /* ตอนกำลังสุ่ม ให้ไฟ "ชาร์จพลัง" ทำงานตัวเดียว — ไม่ซ้อนสองชั้นให้หนักเครื่อง */
+        .stage-frame:has(.result-box.charging)::before { animation: none; opacity: 0; }
+
+        /* 4) เข้าฉากหลังม่านเปิด — ไล่ทีละส่วน (เล่นครั้งเดียว ไม่มีภาระต่อเนื่อง) */
+        body.pre-reveal .header-wrap,
+        body.pre-reveal .theme-bar,
+        body.pre-reveal .stats-bar,
+        body.pre-reveal .progress-wrap,
+        body.pre-reveal .layout { opacity: 0; }
+        body.revealed .header-wrap   { animation: riseIn .6s cubic-bezier(.2,.9,.3,1) .05s both; }
+        body.revealed .theme-bar     { animation: riseIn .6s cubic-bezier(.2,.9,.3,1) .18s both; }
+        body.revealed .stats-bar     { animation: riseIn .6s cubic-bezier(.2,.9,.3,1) .28s both; }
+        body.revealed .progress-wrap { animation: riseIn .6s cubic-bezier(.2,.9,.3,1) .36s both; }
+        body.revealed .layout        { animation: riseIn .7s cubic-bezier(.2,.9,.3,1) .44s both; }
+        @keyframes riseIn { from { opacity: 0; transform: translateY(22px) scale(0.985); } to { opacity: 1; transform: none; } }
+
+        /* 5) ปุ่มยกตัวตอนชี้ — transform ล้วน */
+        button.btn-game { will-change: transform; }
+        button.btn-game:hover { transform: translateY(-2px); }
+        .stat-chip:hover { transform: translateY(-2px); }
+        .theme-btn { will-change: transform; }
+
         /* ── โหมดประหยัด (LITE): ปิดอนิเมชันบรรยากาศทั้งหมด สำหรับเครื่องสเปกต่ำ ── */
         body.lite .theme-decor { display: none; }
         body.lite .stage-bulbs i,
@@ -313,15 +371,26 @@
         body.lite .stage-msg .big,
         body.lite .avatar-halo::before,
         body.lite .stage-frame::after,
+        body.lite .stage-frame::before,
+        body.lite .header-wrap::before,
+        body.lite .spotlight,
         body.lite .hunt-cell.won { animation: none !important; }
+        body.lite .header-wrap::before { display: none; }
+        body.lite .stage-frame::before { opacity: 0.3; }
         body.lite .stage-bulbs i { opacity: 0.85; }
         body.lite .spotlight { display: none; }
         /* เคารพการตั้งค่าระบบ "ลดการเคลื่อนไหว" */
         @media (prefers-reduced-motion: reduce) {
             .theme-decor { display: none; }
             .stage-bulbs i, .term-badge .dot, .stage-msg .big,
-            .avatar-halo::before, .stage-frame::after { animation: none !important; }
+            .avatar-halo::before, .stage-frame::after, .stage-frame::before,
+            .header-wrap::before, .spotlight { animation: none !important; }
             .stage-bulbs i { opacity: 0.85; }
+            .header-wrap::before { display: none; }
+            body.pre-reveal .header-wrap, body.pre-reveal .theme-bar, body.pre-reveal .stats-bar,
+            body.pre-reveal .progress-wrap, body.pre-reveal .layout { opacity: 1; }
+            body.revealed .header-wrap, body.revealed .theme-bar, body.revealed .stats-bar,
+            body.revealed .progress-wrap, body.revealed .layout { animation: none !important; }
         }
 
         /* ── HISTORY PANEL ── */
@@ -546,6 +615,8 @@
 </head>
 <body onload="initLite(); applyTheme('showtime'); renderStageBulbs(); loadAppData(); startCurtain()">
 
+<script>document.body.classList.add('pre-reveal');</script>
+
 <div class="welcome" id="welcome">
     <div class="wc-mid">
         <div class="wc-hi">ยินดีต้อนรับสู่</div>
@@ -599,7 +670,9 @@
     <div class="layout">
         <div class="input-section">
             <div class="glass-panel">
-                <div class="panel-head">📚 เลือกห้องเรียน</div>
+                <div class="panel-head">📚 เลือกห้องเรียน
+                    <button class="refresh-btn" id="refreshBtn" onclick="refreshRoster()" title="ดึงรายชื่อล่าสุดจาก Google Sheet">🔄 ดึงใหม่</button>
+                </div>
                 <select id="savedRooms" onchange="onRoomChange()">
                     <option value="">-- กำลังเชื่อมต่อฐานข้อมูล... ⏳ --</option>
                 </select>
@@ -694,7 +767,7 @@
     // ==========================================
     // ✅ GAS Web App URL (เหมือนเดิม)
     // ==========================================
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbytDzo2bplb4pGbxvIdQ_IT-VuoqDwIuwnt3iWEzjR1yaqTRfQyS3pfRH8ur_ov0sGHiA/exec";
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwO-3AA_Eev42zUIWkYLmdSmMKzZ2b-j2t0Dtol0RpgbJAPzVIwPYq8RhsAZ0qh7cUl/exec";
 
     let allClassrooms = {};
     let allChallenges = {};
@@ -877,14 +950,22 @@
     let curtainTimer = null;
     function startCurtain() {
         const el = document.getElementById('welcome');
-        if (!el) return;
+        if (!el) { revealStage(); return; }
         curtainTimer = setTimeout(openCurtain, 2600);
+        setTimeout(revealStage, 6000);   // กันพลาด: ถึงยังไงเนื้อหาต้องโผล่
+    }
+    // ไล่เนื้อหาโผล่ขึ้นทีละส่วน (เล่นครั้งเดียว)
+    function revealStage() {
+        if (document.body.classList.contains('revealed')) return;
+        document.body.classList.remove('pre-reveal');
+        document.body.classList.add('revealed');
     }
     function openCurtain() {
         const el = document.getElementById('welcome');
         if (!el || el.classList.contains('open')) return;
         if (curtainTimer) { clearTimeout(curtainTimer); curtainTimer = null; }
         el.classList.add('open');
+        revealStage();
         ensureAudio();
         [392, 523, 659, 784].forEach((f, i) => setTimeout(() => beep(f, 0.22, 'triangle', 0.09), i * 150));
         // ซ่อนทิ้งหลังม่านเลื่อนจบ เพื่อไม่ให้ค้างทับหน้าจอ
@@ -953,13 +1034,28 @@
     // ==========================================
     // 📊 STATS + HISTORY
     // ==========================================
+    // ตัวเลขวิ่งไล่ขึ้น/ลง (ใช้ rAF สั้นๆ ไม่กินแรง และหยุดเองเสมอ)
+    const statTimers = {};
+    function animateStat(id, to) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const from = parseInt(el.textContent, 10);
+        if (isNaN(from) || from === to || document.body.classList.contains('lite')) { el.textContent = to; return; }
+        if (statTimers[id]) cancelAnimationFrame(statTimers[id]);
+        const t0 = performance.now(), dur = 420;
+        (function step(now) {
+            const k = Math.min((now - t0) / dur, 1);
+            el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3)));
+            if (k < 1) statTimers[id] = requestAnimationFrame(step); else delete statTimers[id];
+        })(t0);
+    }
     function updateStats() {
         const remaining = getNames().length;
         const drawn = totalInRoom - remaining;
         const pct = totalInRoom > 0 ? (drawn / totalInRoom) * 100 : 0;
-        document.getElementById('statTotal').textContent = totalInRoom;
-        document.getElementById('statDrawn').textContent = Math.max(0, drawn);
-        document.getElementById('statRemain').textContent = remaining;
+        animateStat('statTotal', totalInRoom);
+        animateStat('statDrawn', Math.max(0, drawn));
+        animateStat('statRemain', remaining);
         document.getElementById('progressFill').style.width = pct + '%';
     }
     function onListEdit() { updateStats(); renderAttendance(); }
@@ -1040,6 +1136,38 @@
         } catch (error) {
             document.getElementById('resultDisplay').innerHTML = '<div class="stage-msg warn"><span class="big">⚠️</span><span class="note">เชื่อมต่อ API ไม่สำเร็จ</span></div>';
             console.error("Error fetching data:", error);
+        }
+    }
+
+    // ── ดึงรายชื่อล่าสุดจากชีต โดยไม่ต้องรีโหลดหน้า ──
+    // ใช้เมื่อแก้/ลบชื่อในชีตระหว่างคาบ แล้วอยากให้แอปเห็นของใหม่ทันที
+    async function refreshRoster() {
+        if (isSpinning) return;
+        const btn = document.getElementById('refreshBtn');
+        const keep = document.getElementById('savedRooms').value;
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ กำลังดึง...'; }
+        try {
+            const r = await fetch(GAS_API_URL + "?action=getAppData&_ts=" + Date.now(), { cache: 'no-store' });
+            const data = await r.json();
+            if (data.Error) throw new Error('sheet error');
+            allClassrooms = data.classrooms || {};
+            allChallenges = data.challenges || {};
+            updateRoomDropdown();
+            // กลับไปห้องเดิมถ้ายังมีอยู่ แล้วโหลดรายชื่อชุดใหม่ทับของเก่า
+            const sel = document.getElementById('savedRooms');
+            if (keep && allClassrooms[keep]) { sel.value = keep; onRoomChange(); }
+            else if (keep) {
+                sel.value = '';
+                onRoomChange();
+                alert('ห้อง "' + keep + '" ไม่มีอยู่ในชีตแล้ว กรุณาเลือกห้องใหม่ครับ');
+            }
+            if (btn) btn.textContent = '✅ อัปเดตแล้ว';
+            ensureAudio(); beep(880, 0.12, 'sine', 0.08);
+        } catch (e) {
+            if (btn) btn.textContent = '❌ ดึงไม่สำเร็จ';
+            console.error('refreshRoster failed:', e);
+        } finally {
+            setTimeout(() => { if (btn) { btn.disabled = false; btn.textContent = '🔄 ดึงใหม่'; } }, 1600);
         }
     }
 
@@ -1168,12 +1296,16 @@
     function animShuffle(names, target, myToken, onDone) {
         const display = document.getElementById('resultDisplay');
         display.classList.add('animate-shake');
+        // สร้าง DOM ครั้งเดียว แล้วเปลี่ยนแค่ src/ข้อความทุกเฟรม
+        // (เดิมเขียน innerHTML ใหม่ทุก 70ms = รื้อ-สร้าง element + โหลดรูปใหม่ตลอด ทำให้เครื่องหน่วง)
+        display.innerHTML = '<img class="avatar" id="shufAv" alt=""><div class="winner-name" id="shufName" style="font-size:3rem;"></div>';
+        const av = document.getElementById('shufAv'), nm = document.getElementById('shufName');
         const interval = setInterval(() => {
             if (myToken !== drawToken) { clearInterval(interval); return; }
             const t = names[Math.floor(Math.random()*names.length)];
             tickSound();
-            display.innerHTML = `<img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(t)}&backgroundColor=b6e3f4">
-                                 <div class="winner-name" style="font-size:3rem;">${escHtml(t)}</div>`;
+            if (av) av.src = 'https://api.dicebear.com/7.x/micah/svg?seed=' + encodeURIComponent(t) + '&backgroundColor=b6e3f4';
+            if (nm) nm.textContent = t;
         }, 70);
         setTimeout(() => {
             clearInterval(interval);
