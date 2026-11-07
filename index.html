@@ -401,18 +401,54 @@
         .attend-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .attend-head strong { color: color-mix(in srgb, var(--warning) 88%, #fff); font-size: 0.78rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
         .attend-count { font-size: 0.78rem; font-weight: 700; color: var(--warning); }
+        .attend-head-right { display: flex; align-items: center; gap: 9px; }
+        /* ปุ่มล็อกชื่อ — ตั้งชื่อกลางๆ ว่า "คิวถัดไป" นักเรียนเห็นแล้วไม่เอะใจ */
+        .lock-btn {
+            background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.18);
+            color: rgba(255,255,255,0.75); border-radius: 10px; padding: 3px 11px;
+            font-family: 'Kanit', sans-serif; font-size: 0.78rem; font-weight: 600;
+            cursor: pointer; white-space: nowrap; user-select: none; -webkit-user-select: none;
+            touch-action: manipulation; transition: background .15s, border-color .15s, color .15s;
+        }
+        .lock-btn:hover { background: rgba(255,255,255,0.13); }
+        .lock-btn:disabled { opacity: 0.45; cursor: default; }
+        .lock-btn.picking { background: rgba(255,165,2,0.22); border-color: var(--warning); color: #ffd79a; }
+        .lock-btn.locked  { background: rgba(46,213,115,0.18); border-color: #2ed573; color: #9af0bf; }
+        body.lock-picking .attend-chip { border-color: rgba(255,165,2,0.8); cursor: crosshair; }
         .attend-list { display: flex; flex-wrap: wrap; gap: 6px; max-height: 92px; overflow-y: auto; }
         .attend-chip {
             background: color-mix(in srgb, var(--accent) 18%, rgba(255,255,255,0.08));
             border: 1.5px solid color-mix(in srgb, var(--accent) 45%, transparent);
             color: rgba(255,255,255,0.92); border-radius: 14px; padding: 4px 12px; font-size: 0.85rem; font-weight: 600;
             cursor: pointer; user-select: none; transition: all 0.2s; white-space: nowrap;
+            -webkit-user-select: none; -webkit-touch-callout: none; touch-action: manipulation;
         }
         .attend-chip:hover { transform: translateY(-1px); }
         .attend-chip.absent {
             background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.15);
             color: rgba(255,255,255,0.4); text-decoration: line-through; text-decoration-color: var(--primary);
         }
+        /* จุดสถานะ "โหมดล็อกชื่อ" — เล็ก 8px จางๆ มุมขวาล่าง นักเรียนไม่ทันสังเกต แต่ครูมองจากจอตัวเองเห็นชัด */
+        #lockDot {
+            position: fixed; right: 7px; bottom: 7px; width: 8px; height: 8px; border-radius: 50%;
+            background: #fff; opacity: 0; pointer-events: none; z-index: 9999;
+            transition: opacity .18s, background .18s;
+        }
+        #lockDot.armed   { background: #ffa502; opacity: .50; }
+        #lockDot.ready   { background: #2ed573; opacity: .80; }
+        #lockDot.bad     { background: #ff4757; opacity: .60; }
+        #lockDot.pending { background: #2ed573; opacity: .32; pointer-events: auto; cursor: pointer; }
+        /* นิ้วแตะจุด 8px ไม่ไหว — ขยายพื้นที่แตะเป็น 34px แบบมองไม่เห็น (เฉพาะตอนมีล็อกอยู่) */
+        #lockDot.pending::after { content: ''; position: absolute; inset: -13px; border-radius: 50%; }
+        #lockDot { touch-action: manipulation; -webkit-touch-callout: none; }
+        /* ป้ายบอกชื่อที่ล็อกไว้ สำหรับ iPad ที่เอาเมาส์ไปชี้ไม่ได้ — เล็กและจาง โชว์แวบเดียว */
+        #lockPeek {
+            position: fixed; right: 26px; bottom: 4px; max-width: 46vw; z-index: 9999;
+            font-family: 'Kanit', sans-serif; font-size: 12px; font-weight: 400; line-height: 1.25;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            color: rgba(255,255,255,0.5); opacity: 0; pointer-events: none; transition: opacity .2s;
+        }
+        #lockPeek.show { opacity: 1; }
         .history-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .history-head strong { color: color-mix(in srgb, var(--warning) 88%, #fff); font-size: 0.78rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
         .history-clear { background: rgba(255,71,87,0.2); border: 1px solid var(--primary); color: #ff7081; border-radius: 8px; padding: 4px 10px; font-size: 0.8rem; cursor: pointer; font-family: 'Kanit', sans-serif; font-weight: 600; }
@@ -684,7 +720,10 @@
             <div class="attendance-panel">
                 <div class="attend-head">
                     <strong>🙋 เช็คชื่อวันนี้</strong>
-                    <span class="attend-count" id="attendCount"></span>
+                    <span class="attend-head-right">
+                        <button class="lock-btn" id="lockBtn" type="button" onclick="toggleLockPick()">🎯 คิวถัดไป</button>
+                        <span class="attend-count" id="attendCount"></span>
+                    </span>
                 </div>
                 <div class="attend-list" id="attendanceList">
                     <span class="history-empty">ยังไม่มีรายชื่อ</span>
@@ -850,6 +889,22 @@
         const chip = e.target.closest('.attend-chip');
         if (!chip) return;
         const name = chip.dataset.name;
+        if (touchLockFired) { touchLockFired = false; return; }   // เพิ่งแตะค้างเพื่อล็อก — อย่าติ๊กขาดเรียนซ้ำ
+        if (pickMode) {                      // กดปุ่ม "คิวถัดไป" ไว้ → แตะชื่อเดียวจบ
+            if (getNames().indexOf(name) === -1) { ensureAudio(); beep(220, 0.09, 'sine', 0.05); return; }
+            pickMode = false;
+            lockedName = name;
+            paintLockDot();
+            lockBeep();
+            return;
+        }
+        if (e.altKey) {                      // Alt / Option + คลิก = ทางลัดสำหรับเมาส์
+            if (absentSet.has(name)) return; // คนที่ติ๊กขาดเรียนอยู่ ล็อกไม่ได้
+            lockedName = name;
+            paintLockDot();
+            lockBeep();
+            return;
+        }
         if (absentSet.has(name)) absentSet.delete(name); else absentSet.add(name);
         renderAttendance();
         updateStats();
@@ -875,6 +930,242 @@
         if (!soundOn()) return;
         [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.18, 'triangle', 0.1), i*120));
     }
+
+    // ==========================================
+    // 🔒 โหมดล็อกชื่อ — เลือกไว้ล่วงหน้าว่าใครจะออกในการ "สุ่ม 1 คน" ครั้งถัดไป
+    // ออกแบบให้นักเรียนไม่รู้ตัว: ไม่มีข้อความ ไม่มีป้าย ไม่มีกล่องขึ้นบนจอเลย
+    // ทั้งแอนิเมชันและลูกเล่นแกล้งสลับชื่อยังทำงานเหมือนการสุ่มจริง 100%
+    //
+    // สถานะบอกผ่านจุดเล็กๆ มุมขวาล่าง (#lockDot) เท่านั้น:
+    //   ไม่มีจุด = ปิดอยู่ | เหลือง = กำลังพิมพ์ | เขียวสว่าง = เจอคนเดียว กด Enter ได้
+    //   แดง = ไม่พบ/ซ้ำหลายคน | เขียวจาง = ล็อกไว้แล้ว รอการสุ่มครั้งถัดไป
+    //
+    // วิธีใช้: กดปุ่ม ` (ซ้ายบนสุดของคีย์บอร์ด) → พิมพ์ชื่อ หรือเลขลำดับ → Enter
+    //          กด ` ใหม่ = เริ่มพิมพ์ใหม่ | Escape = ออกจากโหมด | คลิกจุดเขียวจาง = ยกเลิกล็อก
+    //          หรือ Alt + คลิกชื่อในช่อง "เช็คชื่อ" ก็ล็อกได้ทันที
+    // ล็อกใช้ได้ครั้งเดียว แล้วล้างตัวเองอัตโนมัติ (กันลืมแล้วออกคนเดิมซ้ำ)
+    // ==========================================
+    let lockedName   = null;    // ชื่อที่ล็อกไว้สำหรับการสุ่ม 1 คนครั้งถัดไป
+    let pickMode     = false;   // กดปุ่ม "คิวถัดไป" แล้ว กำลังรอให้แตะชื่อ
+    let stealthArmed = false;   // กำลังรับการพิมพ์แบบไม่แสดงบนจออยู่หรือไม่
+    let stealthBuf   = '';      // ตัวอักษรที่พิมพ์ค้างไว้ (ไม่ขึ้นบนจอ)
+
+    function lockDotEl() {
+        let d = document.getElementById('lockDot');
+        if (!d) {
+            d = document.createElement('span');
+            d.id = 'lockDot';
+            d.setAttribute('aria-hidden', 'true');
+            bindLockDot(d);
+            document.body.appendChild(d);
+        }
+        return d;
+    }
+
+    function paintLockDot(state) {
+        const d = lockDotEl();
+        d.className = state || (lockedName ? 'pending' : '');
+        d.title = (!state && lockedName) ? lockedName : '';   // เอาเมาส์ชี้จุดถึงจะเห็นว่าล็อกใครไว้
+        renderLockBtn();
+    }
+
+    // ปุ่ม "คิวถัดไป" — ทางที่ง่ายที่สุด ใช้ได้เหมือนกันทั้ง MacBook และ iPad ไม่ต้องจำปุ่มลัด
+    function renderLockBtn() {
+        const b = document.getElementById('lockBtn');
+        if (!b) return;
+        b.classList.toggle('picking', pickMode);
+        b.classList.toggle('locked', !pickMode && !!lockedName);
+        b.textContent = pickMode ? '👆 แตะชื่อเลย' : (lockedName ? '🎯 ตั้งคิวแล้ว' : '🎯 คิวถัดไป');
+        b.title = lockedName ? ('ตั้งคิวไว้: ' + lockedName + ' — กดปุ่มนี้เพื่อยกเลิก')
+                : pickMode ? 'แตะชื่อนักเรียนในรายการด้านล่าง (กดปุ่มนี้อีกครั้งเพื่อออก)'
+                : 'เลือกไว้ล่วงหน้าว่าใครจะถูกสุ่มในรอบถัดไป';
+        document.body.classList.toggle('lock-picking', pickMode);
+    }
+
+    function toggleLockPick() {
+        if (isSpinning) return;
+        if (lockedName) { pickMode = false; clearLock(); return; }   // มีคิวอยู่แล้ว → กด = ยกเลิก
+        pickMode = !pickMode;
+        if (pickMode) disarmStealth();                               // กันโหมดพิมพ์ค้างอยู่
+        paintLockDot();
+        ensureAudio(); beep(pickMode ? 760 : 420, 0.07, 'sine', 0.07);
+    }
+
+    function clearLock() {
+        if (!lockedName) return;
+        lockedName = null;
+        paintLockDot();
+        const p = document.getElementById('lockPeek');
+        if (p) p.classList.remove('show');   // ป้ายที่ค้างอยู่ต้องไม่โชว์ชื่อที่เพิ่งยกเลิกไป
+        ensureAudio(); beep(300, 0.06, 'sine', 0.05);
+    }
+
+    // ตัดคำนำหน้าชื่อทิ้ง เพื่อให้พิมพ์แค่ชื่อจริงก็เจอ (ไม่ต้องพิมพ์ "นางสาว")
+    function bareName(s) {
+        return String(s).replace(/\s+/g, '').toLowerCase()
+                        .replace(/^(นางสาว|เด็กหญิง|เด็กชาย|นาง|นาย)/, '');
+    }
+
+    // หาชื่อที่ตรงกับที่พิมพ์: ตัวเลข = ลำดับที่ในรายชื่อ, ตัวอักษร = ขึ้นต้นด้วย แล้วค่อยลองแบบมีคำนี้อยู่
+    function stealthMatches(buf) {
+        const q = String(buf).trim();
+        if (!q) return [];
+        const pool = getNames();                       // ไม่รวมคนที่ติ๊กขาดเรียนไว้
+        if (!pool.length) return [];
+        if (/^\d+$/.test(q)) {
+            const n = getAllRawNames()[parseInt(q, 10) - 1];
+            return (n && pool.indexOf(n) !== -1) ? [n] : [];
+        }
+        const key = bareName(q);
+        // ชื่อที่ตรงเป๊ะต้องชนะชื่อที่ยาวกว่าเสมอ — ไม่งั้นพิมพ์ "ธนา" แล้วไปล็อก "ธนากร" ให้
+        const exact = pool.filter(n => bareName(n) === key);
+        let hits = exact.length ? exact : pool.filter(n => bareName(n).startsWith(key));
+        if (!hits.length) {
+            const loose = q.replace(/\s+/g, '').toLowerCase();
+            hits = pool.filter(n => String(n).replace(/\s+/g, '').toLowerCase().includes(loose));
+        }
+        // ถ้าในห้องมีชื่อซ้ำกันเป๊ะ (คนละคนแต่ชื่อเหมือนกัน) ให้นับเป็นคนเดียว ไม่งั้นจะล็อกไม่ได้เลย
+        const uniq = [...new Set(hits)];
+        return uniq.length === 1 ? [uniq[0]] : hits;
+    }
+
+    // เริ่มพิมพ์ใหม่ = ล้างล็อกเดิมทิ้งก่อน กันกรณีพิมพ์ชื่อใหม่ไม่ติดแล้วคนเก่าโดนเรียกซ้ำ
+    function armStealth()    { lockedName = null; pickMode = false; stealthArmed = true; stealthBuf = ''; paintLockDot('armed'); }
+    function disarmStealth() { stealthArmed = false; stealthBuf = ''; paintLockDot(); }
+
+    function refreshStealth() {
+        if (!stealthArmed) return;
+        if (!stealthBuf) return paintLockDot('armed');
+        const hits = stealthMatches(stealthBuf);
+        paintLockDot(hits.length === 1 ? 'ready' : (hits.length === 0 ? 'bad' : 'armed'));
+    }
+
+    function lockBeep() {   // เสียงยืนยันสั้นๆ กลืนไปกับเสียงติ๊กตอนสุ่ม นักเรียนแยกไม่ออก
+        ensureAudio();
+        beep(1180, 0.05, 'square', 0.045);
+        setTimeout(() => beep(1480, 0.05, 'square', 0.045), 60);
+    }
+
+    function commitStealth() {
+        const hits = stealthMatches(stealthBuf);
+        if (hits.length !== 1) {              // ไม่พบ หรือตรงหลายคน: ไม่ล็อก ล้างที่พิมพ์ไว้ให้พิมพ์ใหม่
+            ensureAudio(); beep(220, 0.09, 'sine', 0.05);
+            stealthBuf = '';
+            paintLockDot('bad');
+            return;
+        }
+        lockedName = hits[0];
+        stealthArmed = false;
+        stealthBuf = '';
+        paintLockDot();
+        lockBeep();
+    }
+
+    // ดึงชื่อที่ล็อกไว้มาใช้ (ครั้งเดียว) — ถ้าคนนั้นไม่อยู่ในรายชื่อที่สุ่มได้แล้ว ก็สุ่มปกติแทนแบบเงียบๆ
+    function takeLockedWinner(names) {
+        if (!lockedName) return null;
+        const n = lockedName;
+        lockedName = null;
+        paintLockDot();
+        return names.indexOf(n) !== -1 ? n : null;
+    }
+
+    function resetLock() { lockedName = null; pickMode = false; stealthArmed = false; stealthBuf = ''; paintLockDot(); }
+
+    // พอครูไปคลิกอย่างอื่น ถือว่าเลิกเลือกแล้ว — กันโหมดค้างไว้แล้วกด Space ไม่สุ่ม / แตะชื่อแล้วงง
+    document.addEventListener('click', (e) => {
+        const t = e.target;
+        if (stealthArmed && !(t && t.id === 'lockDot')) disarmStealth();
+        if (pickMode && t && !t.closest('.attend-chip') && t.id !== 'lockBtn') {
+            pickMode = false;
+            paintLockDot();
+        }
+    });
+
+    // ==========================================
+    // 📱 ล็อกชื่อบน iPad / จอสัมผัส (ไม่มีคีย์บอร์ด ไม่มีปุ่ม Alt)
+    //   แตะชื่อค้างไว้ ~0.6 วิ ในช่อง "เช็คชื่อ" = ล็อกคนนั้น   (แตะสั้น = ติ๊กขาดเรียนตามปกติ)
+    //   เลื่อนนิ้วระหว่างกด = ยกเลิก (ถือว่าเลื่อนดูรายชื่อ ไม่ใช่สั่งล็อก)
+    //   แตะจุดมุมขวาล่าง = โชว์ชื่อที่ล็อกไว้แวบเดียว | แตะจุดค้างไว้ = ยกเลิกล็อก
+    // ==========================================
+    const LONG_PRESS_MS = 600;
+    let touchLockFired = false;   // เพิ่งล็อกด้วยการแตะค้าง — ต้องกลืน click ที่ตามมา ไม่ให้ไปติ๊กขาดเรียน
+
+    function peekLock() {
+        let p = document.getElementById('lockPeek');
+        if (!p) {
+            p = document.createElement('span');
+            p.id = 'lockPeek';
+            p.setAttribute('aria-hidden', 'true');
+            document.body.appendChild(p);
+        }
+        p.textContent = lockedName || 'ยังไม่ได้ล็อก';
+        p.classList.add('show');
+        clearTimeout(peekLock._t);
+        peekLock._t = setTimeout(() => p.classList.remove('show'), 1600);
+    }
+
+    function lockByTouch(name) {
+        // ต้องยังอยู่ในรายชื่อที่สุ่มได้จริง — กันกรณีติ๊กขาดเรียน หรือรายชื่อเปลี่ยนระหว่างที่นิ้วยังกดค้าง
+        if (getNames().indexOf(name) === -1) { ensureAudio(); beep(220, 0.09, 'sine', 0.05); return; }
+        pickMode = false;
+        lockedName = name;
+        paintLockDot();
+        lockBeep();
+    }
+
+    function bindLockDot(d) {
+        let timer = null, longFired = false, touchAt = 0;
+        const stop = () => { if (timer) { clearTimeout(timer); timer = null; } };
+        if (window.PointerEvent) {
+            d.addEventListener('pointerdown', (e) => {
+                longFired = false;
+                if (e.pointerType === 'mouse') return;   // เมาส์: ใช้คลิกเดียวจบ
+                touchAt = Date.now();
+                stop();
+                timer = setTimeout(() => { timer = null; longFired = true; clearLock(); }, LONG_PRESS_MS);
+            });
+            d.addEventListener('pointerup', (e) => {
+                stop();
+                if (e.pointerType === 'mouse') { clearLock(); return; }
+                touchAt = Date.now();
+                if (!longFired) peekLock();              // นิ้วแตะสั้น = ขอดูชื่อ
+            });
+            d.addEventListener('pointercancel', stop);
+            d.addEventListener('contextmenu', (e) => e.preventDefault());
+        }
+        // สำรองไว้เสมอ: เบราว์เซอร์ที่ไม่มี Pointer Events และกรณีที่มี click แต่ไม่มี pointerup
+        d.addEventListener('click', () => {
+            if (Date.now() - touchAt < 800) return;      // นิ้วจัดการไปแล้ว อย่ายกเลิกซ้ำ
+            clearLock();
+        });
+    }
+
+    (function bindTouchLock() {
+        const list = document.getElementById('attendanceList');
+        if (!list || !window.PointerEvent) return;
+        let timer = null, sx = 0, sy = 0;
+        const stop = () => { if (timer) { clearTimeout(timer); timer = null; } };
+        list.addEventListener('pointerdown', (e) => {
+            touchLockFired = false;
+            if (e.pointerType === 'mouse') return;
+            const chip = e.target.closest && e.target.closest('.attend-chip');
+            if (!chip) return;
+            const name = chip.dataset.name;
+            sx = e.clientX; sy = e.clientY;
+            stop();
+            timer = setTimeout(() => { timer = null; touchLockFired = true; lockByTouch(name); }, LONG_PRESS_MS);
+        });
+        list.addEventListener('pointermove', (e) => {
+            if (!timer) return;
+            if (Math.abs(e.clientX - sx) > 10 || Math.abs(e.clientY - sy) > 10) stop();
+        });
+        list.addEventListener('pointerup', stop);
+        list.addEventListener('pointercancel', stop);
+        list.addEventListener('contextmenu', (e) => {
+            if (e.target.closest && e.target.closest('.attend-chip')) e.preventDefault();
+        });
+    })();
     function scoreSound() { [784, 1047].forEach((f,i)=>setTimeout(()=>beep(f,0.12,'sine',0.09), i*90)); }
 
     // ==========================================
@@ -1100,6 +1391,22 @@
     document.addEventListener('keydown', (e) => {
         const tag = (e.target.tagName || '').toLowerCase();
         if (tag === 'textarea' || tag === 'input' || tag === 'select') return; // ไม่ขัดการพิมพ์
+
+        // ── โหมดล็อกชื่อ: ` เปิด/ปิด แล้วพิมพ์ชื่อหรือเลขลำดับ จบด้วย Enter (ไม่มีอะไรขึ้นบนจอ) ──
+        if (e.code === 'Backquote') {   // กดเมื่อไหร่ก็ได้ = เริ่มพิมพ์ใหม่ตั้งแต่ต้น (ออกจากโหมดด้วย Escape)
+            e.preventDefault();
+            armStealth();
+            return;
+        }
+        if (stealthArmed) {
+            if (e.ctrlKey || e.metaKey || e.altKey) return;   // ปล่อยคีย์ลัดเบราว์เซอร์ผ่านไปตามปกติ
+            if (e.key === 'Escape')    { e.preventDefault(); disarmStealth(); return; }
+            if (e.key === 'Enter')     { e.preventDefault(); commitStealth(); return; }
+            if (e.key === 'Backspace') { e.preventDefault(); stealthBuf = stealthBuf.slice(0, -1); refreshStealth(); return; }
+            if (e.key.length === 1)    { e.preventDefault(); stealthBuf += e.key; refreshStealth(); return; }
+            return;
+        }
+
         if (e.code === 'Space') {
             e.preventDefault();
             if (!isSpinning) startRandom('single');
@@ -1188,6 +1495,7 @@
         clearHistory();
         hideUndoBar(); lastDraw = null;
         absentSet = new Set(); drawCounts = {};   // เริ่มต้นใหม่: ไม่มีใครขาด, ยังไม่มีใครถูกสุ่ม
+        resetLock();                              // เปลี่ยนห้องแล้ว ล้างชื่อที่ล็อกไว้ของห้องเก่า
         if (room && allClassrooms[room]) {
             ta.value = allClassrooms[room].join('\n');
             totalInRoom = allClassrooms[room].length;
@@ -1209,6 +1517,7 @@
             clearHistory();
             hideUndoBar(); lastDraw = null;
             absentSet = new Set(); drawCounts = {};
+            resetLock();
             updateStats();
             renderAttendance();
             document.getElementById('resultDisplay').innerHTML = '<div class="stage-msg"><span class="big">RESET</span><span class="note">🔄 รีเซ็ตรายชื่อครบแล้ว!</span></div>';
@@ -1390,7 +1699,8 @@
         const display = document.getElementById('resultDisplay');
         display.classList.add('charging');
 
-        const winner = pickWeightedWinner(names);
+        // ถ้าครูล็อกชื่อไว้ ใช้คนนั้น (ใช้ได้ครั้งเดียว) ไม่ก็สุ่มตามปกติ — แอนิเมชันเหมือนเดิมทุกอย่าง
+        const winner = takeLockedWinner(names) || pickWeightedWinner(names);
         const style = pickDrawStyle();
         const decoyPool = names.filter(n => n !== winner);
         const wantFake = decoyPool.length > 0 && fakeoutOn() && Math.random() < FAKEOUT_CHANCE;
