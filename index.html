@@ -402,11 +402,11 @@
         .attend-head strong { color: color-mix(in srgb, var(--warning) 88%, #fff); font-size: 0.78rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
         .attend-count { font-size: 0.78rem; font-weight: 700; color: var(--warning); }
         .attend-head-right { display: flex; align-items: center; gap: 9px; }
-        /* ปุ่มล็อกชื่อ — ตั้งชื่อกลางๆ ว่า "คิวถัดไป" นักเรียนเห็นแล้วไม่เอะใจ */
+        /* ปุ่มล็อกชื่อ — ไอคอนอย่างเดียว 🎯 → 👆 (กำลังเลือก) → ⭐ (ตั้งคิวแล้ว) นักเรียนเห็นแล้วไม่เอะใจ */
         .lock-btn {
             background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.18);
-            color: rgba(255,255,255,0.75); border-radius: 10px; padding: 3px 11px;
-            font-family: 'Kanit', sans-serif; font-size: 0.78rem; font-weight: 600;
+            color: rgba(255,255,255,0.75); border-radius: 10px; padding: 2px 9px; min-width: 34px;
+            font-family: 'Kanit', sans-serif; font-size: 0.95rem; line-height: 1.3; font-weight: 600;
             cursor: pointer; white-space: nowrap; user-select: none; -webkit-user-select: none;
             touch-action: manipulation; transition: background .15s, border-color .15s, color .15s;
         }
@@ -721,7 +721,7 @@
                 <div class="attend-head">
                     <strong>🙋 เช็คชื่อวันนี้</strong>
                     <span class="attend-head-right">
-                        <button class="lock-btn" id="lockBtn" type="button" onclick="toggleLockPick()">🎯 คิวถัดไป</button>
+                        <button class="lock-btn" id="lockBtn" type="button" onclick="toggleLockPick()" aria-label="คิวถัดไป" title="เลือกไว้ล่วงหน้าว่าใครจะถูกสุ่มในรอบถัดไป">🎯</button>
                         <span class="attend-count" id="attendCount"></span>
                     </span>
                 </div>
@@ -975,7 +975,8 @@
         if (!b) return;
         b.classList.toggle('picking', pickMode);
         b.classList.toggle('locked', !pickMode && !!lockedName);
-        b.textContent = pickMode ? '👆 แตะชื่อเลย' : (lockedName ? '🎯 ตั้งคิวแล้ว' : '🎯 คิวถัดไป');
+        b.textContent = pickMode ? '👆' : (lockedName ? '⭐' : '🎯');   // ไอคอนอย่างเดียว ไม่มีคำให้นักเรียนอ่าน
+        b.setAttribute('aria-label', pickMode ? 'แตะชื่อที่จะตั้งคิว' : (lockedName ? 'ตั้งคิวแล้ว' : 'คิวถัดไป'));
         b.title = lockedName ? ('ตั้งคิวไว้: ' + lockedName + ' — กดปุ่มนี้เพื่อยกเลิก')
                 : pickMode ? 'แตะชื่อนักเรียนในรายการด้านล่าง (กดปุ่มนี้อีกครั้งเพื่อออก)'
                 : 'เลือกไว้ล่วงหน้าว่าใครจะถูกสุ่มในรอบถัดไป';
@@ -1557,8 +1558,14 @@
         { name: 'ทีมจระเข้',  emoji: '🐊', c1: '#16a085', c2: '#0a4a3d' },
     ];
 
+    // พลุกระดาษโหลดมาจาก CDN — ถ้าเน็ตโรงเรียนบล็อก/โหลดไม่ทัน ห้ามทำให้การประกาศผลพังทั้งหน้า
+    function fireConfetti(opts) {
+        try { if (typeof confetti === 'function') confetti(opts); } catch (e) { /* ไม่มีพลุก็ประกาศผลต่อได้ */ }
+    }
+
     function startRandom(mode) {
         if (isSpinning) return;
+        if (pickMode) { pickMode = false; paintLockDot(); }   // เริ่มสุ่มแล้ว เลิกไฮไลต์ชิป ไม่ให้ค้างโชว์บนจอ
         const names = getNames();
         if (names.length === 0) return alert('กรุณาเลือกห้อง หรือใส่รายชื่อก่อนครับ!');
         ensureAudio();
@@ -1807,7 +1814,7 @@
         const display = document.getElementById('resultDisplay');
         display.classList.remove('charging');
         winSound();
-        confetti({ particleCount: 200, spread: 120, origin: { y: 0.6 } });
+        fireConfetti({ particleCount: 200, spread: 120, origin: { y: 0.6 } });
 
         const mascotPool = shuffle([...MASCOTS]).slice(0, teamCount);
         const teams = Array.from({ length: teamCount }, () => []);
@@ -1835,9 +1842,9 @@
         const display = document.getElementById('resultDisplay');
         display.classList.remove('charging');
         winSound();
-        confetti({ particleCount: 220, spread: 110, origin: { y: 0.6 } });
-        setTimeout(() => confetti({ particleCount: 80, angle: 60, spread: 70, origin: { x: 0 } }), 200);
-        setTimeout(() => confetti({ particleCount: 80, angle: 120, spread: 70, origin: { x: 1 } }), 200);
+        fireConfetti({ particleCount: 220, spread: 110, origin: { y: 0.6 } });
+        setTimeout(() => fireConfetti({ particleCount: 80, angle: 60, spread: 70, origin: { x: 0 } }), 200);
+        setTimeout(() => fireConfetti({ particleCount: 80, angle: 120, spread: 70, origin: { x: 1 } }), 200);
 
         const order = drawHistory.length + 1;
         let html = `<div class="reveal-flash"></div>
@@ -1962,7 +1969,7 @@
         const shuffled = shuffle([...names]);
         display.classList.remove('charging');
         winSound();
-        confetti({ particleCount: 160, spread: 100, origin: { y: 0.6 } });
+        fireConfetti({ particleCount: 160, spread: 100, origin: { y: 0.6 } });
         const fx = `<div class="reveal-flash"></div>${sparkleHtml(7)}`;
         if (mode === 'pair') {
             let html = fx + '<div class="result-list"><strong style="color:#ffd32a;font-size:1.5rem;">👥 จับคู่ลุยงาน:</strong><br>';
@@ -1994,7 +2001,7 @@
             const result = await res.json();
             btn.innerHTML = result.message;
             btn.style.backgroundColor = '#2ed573'; btn.style.boxShadow = '0 6px 0 #27ae60';
-            confetti({ particleCount: 50, spread: 40, origin: { y: 0.8 } });
+            fireConfetti({ particleCount: 50, spread: 40, origin: { y: 0.8 } });
         } catch (e) {
             btn.innerHTML = '❌ บันทึกไม่สำเร็จ';
             btn.style.backgroundColor = '#ff4757'; btn.disabled = false;
