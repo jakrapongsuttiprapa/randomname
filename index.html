@@ -1010,6 +1010,81 @@
         body[data-skin="cosmic"] .fs-btn { border-radius: 16px; background: rgba(20,24,64,0.8); border-color: rgba(255,255,255,0.25); }
         body[data-skin="cosmic"] .countdown-num { font-family: 'Audiowide', sans-serif; }
 
+
+        /* ══════════════════════════════════════════════════════════════
+           ✨ เก็บงานหน้าตา — แก้จุดที่ดูไม่เรียบร้อย (ไม่แตะการทำงาน)
+           ══════════════════════════════════════════════════════════════ */
+        /* 1) ป้าย WINNER เคยทับขอบวงแหวนรอบรูป → เว้นระยะให้ */
+        .winner-badge { margin-bottom: 26px; position: relative; z-index: 3; }
+        /* 2) ประกาย ⭐✨ เคยลอยทับหน้าและชื่อผู้ชนะ → ให้อยู่ด้านหลังเนื้อหาเสมอ */
+        .sparkle { z-index: 1; }
+        .result-list, .team-reveal { position: relative; z-index: 2; }
+        /* 3) เวทีสูงเท่าแผงซ้ายเสมอ ไม่เหลือที่ว่างโหว่ใต้เวที */
+        .result-section { display: flex; flex-direction: column; }
+        .stage-frame { flex: 1 1 auto; display: flex; flex-direction: column; scroll-margin-top: 12px; }
+        .result-box { flex: 1 1 auto; }
+        /* 4) แถบ "เอากลับ": ปุ่มไม่ตกบรรทัด */
+        .undo-btn { white-space: nowrap; flex: none; }
+        .undo-bar .undo-txt { min-width: 0; }
+        /* 5) ปุ่มมุมขวาบน รวมเป็นแถบเครื่องมือลอยอันเดียว (เดิมเป็นปุ่มแยกๆ ทับมุมกล่อง) */
+        .top-controls {
+            top: 14px; right: 14px; gap: 4px; padding: 5px; border-radius: 18px;
+            background: rgba(14,10,22,0.88); border: 1px solid rgba(255,255,255,0.16);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+        }
+        .fs-btn { width: 42px; height: 42px; border: 0; background: transparent; border-radius: 13px; font-size: 1.2rem; }
+        .fs-btn:hover { background: rgba(255,255,255,0.14); transform: none; }
+        body[data-skin] .fs-btn { background: transparent; }
+        body[data-skin] .fs-btn:hover { background: rgba(255,255,255,0.14); }
+        .fs-btn.active, body[data-skin] .fs-btn.active { background: var(--accent); }
+        body[data-skin="neon"] .top-controls   { border-radius: 4px; border-color: rgba(34,230,255,0.5); background: rgba(8,10,20,0.92); }
+        body[data-skin="gala"] .top-controls   { border-radius: 4px; border-color: #8a6d22; background: rgba(12,10,7,0.94); }
+        body[data-skin="cosmic"] .top-controls { border-radius: 20px; background: rgba(16,19,54,0.92); }
+
+        /* 6) ส่วนที่สกินยังไม่ได้แต่ง: แถบเอากลับ + ปุ่มคัดลอก/ล้าง */
+        body[data-skin="neon"] .undo-bar { border-radius: 0; border: 1px solid rgba(255,43,214,0.45); background: #0a0d1a; }
+        body[data-skin="neon"] .undo-btn { border-radius: 2px; background: transparent; border: 1px solid #ff2bd6; color: #ffb3f2; box-shadow: none; }
+        body[data-skin="neon"] .history-export { background: transparent; border-color: #22e6ff; color: #9eefff; }
+        body[data-skin="neon"] .history-clear  { background: transparent; border-color: #ff2bd6; color: #ffb3f2; }
+        body[data-skin="gala"] .undo-bar { border-radius: 2px; border: 1px solid #6e5719; background: #120e08; }
+        body[data-skin="gala"] .undo-btn { border-radius: 2px; background: linear-gradient(180deg, #f8e08e, #d4af37); color: #241a04; box-shadow: 0 3px 0 #5a4512; }
+        body[data-skin="gala"] .history-export { background: transparent; border-color: #8a6d22; color: #e8c766; border-radius: 2px; }
+        body[data-skin="gala"] .history-clear  { background: transparent; border-color: #8b1538; color: #f3b6c4; border-radius: 2px; }
+        body[data-skin="cosmic"] .undo-bar { border-radius: 18px; border: 1px solid rgba(255,255,255,0.14); background: rgba(20,24,64,0.78); }
+        body[data-skin="cosmic"] .undo-btn { border-radius: 12px; background: rgba(139,92,246,0.35); border: 1px solid rgba(167,139,250,0.7); box-shadow: none; }
+        body[data-skin="cosmic"] .history-export { background: rgba(62,242,200,0.1); border-color: rgba(62,242,200,0.5); color: #9ff7e2; border-radius: 10px; }
+        body[data-skin="cosmic"] .history-clear  { background: rgba(255,122,198,0.1); border-color: rgba(255,122,198,0.5); color: #ffc2e6; border-radius: 10px; }
+        /* 7) สกินอวกาศ: ฟอนต์ Audiowide เลข 0 มีขีดทับ อ่านเป็น Ø → ตัวเลขใช้ Kanit */
+        body[data-skin="cosmic"] .stat-chip .num,
+        body[data-skin="cosmic"] .countdown-num { font-family: 'Kanit', sans-serif; font-weight: 800; }
+        body[data-skin="cosmic"] .winner-badge { font-family: 'Kanit', sans-serif; font-weight: 600; }
+
+        /* 8) มือถือ: ปุ่มมุมขวาบนเคยทับป้ายเทอมและชื่อเว็บ, เวทีล้นกล่องออกขวา */
+        @media (max-width: 760px) {
+            body { padding: 74px 12px 20px; }
+            .top-controls, .settings-panel { position: absolute; }
+            .input-section, .result-section { min-width: 0; flex-basis: 100%; }
+            .result-box { min-height: 440px; padding: 24px 14px; }
+            /* กรอบมุมเวที (นีออน/กาล่า) กับดาวเคราะห์ (อวกาศ) เคยทับป้าย WINNER บนจอแคบ */
+            body[data-skin="neon"] .result-box, body[data-skin="gala"] .result-box { padding: 56px 14px; }
+            body[data-skin="cosmic"] .result-box {
+                padding-top: 40px;
+                background:
+                    radial-gradient(circle 64px at calc(100% - 4px) 4px, #ffb3de 0%, #a173ff 45%, #3a238f 92%, transparent 93%) no-repeat,
+                    radial-gradient(circle 16px at 30px calc(100% - 30px), #fff2c2 0%, #c8a64a 94%, transparent 96%) no-repeat,
+                    radial-gradient(ellipse 46% 40% at 50% 44%, rgba(139,92,246,0.42), transparent 70%),
+                    radial-gradient(ellipse 80% 30% at 50% 102%, rgba(62,242,200,0.2), transparent 70%),
+                    #080b2e;
+            }
+            body[data-skin="cosmic"] .result-box::before { top: 8px; right: -56px; width: 170px; height: 32px; border-width: 2px; }
+        }
+        @media (max-width: 600px) {
+            /* แถวเลือกสกิน/สี จัดเป็นตารางเรียบร้อย ไม่ตกบรรทัดเหลือเศษ */
+            .skin-bar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 270px; margin-left: auto; margin-right: auto; }
+            .skin-bar .theme-label, .theme-bar .theme-label { display: none; }
+            .theme-bar { display: grid; grid-template-columns: repeat(5, 28px); justify-content: center; gap: 10px 16px; }
+        }
+
         /* โหมดประหยัด / ผู้ใช้ตั้งลดการเคลื่อนไหว: หยุดฉากหลังของทุกสกิน */
         body.lite .skin-fx::before, body.lite .skin-fx::after { animation: none !important; }
         @media (prefers-reduced-motion: reduce) { .skin-fx::before, .skin-fx::after { animation: none !important; } }
@@ -2043,6 +2118,17 @@
         try { if (typeof confetti === 'function') confetti(opts); } catch (e) { /* ไม่มีพลุก็ประกาศผลต่อได้ */ }
     }
 
+    // ถ้าเวทีอยู่นอกจอ (มือถือ: เวทีอยู่ใต้แผงควบคุม) ให้เลื่อนไปหาเวทีตอนเริ่มสุ่ม
+    function bringStageIntoView() {
+        const st = document.querySelector('.stage-frame');
+        if (!st || typeof st.scrollIntoView !== 'function') return;
+        const r = st.getBoundingClientRect(), vh = window.innerHeight || 0;
+        const visible = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+        if (visible >= Math.min(r.height, vh) * 0.6) return;
+        const calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        st.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' });
+    }
+
     function startRandom(mode) {
         if (isSpinning) return;
         if (pickMode) { pickMode = false; paintLockDot(); }   // เริ่มสุ่มแล้ว เลิกไฮไลต์ชิป ไม่ให้ค้างโชว์บนจอ
@@ -2050,6 +2136,7 @@
         if (names.length === 0) return alert('กรุณาเลือกห้อง หรือใส่รายชื่อก่อนครับ!');
         ensureAudio();
         drawToken++;
+        bringStageIntoView();
 
         if (mode === 'single') {
             startSingleDraw(names);
@@ -2103,7 +2190,7 @@
         let s = '';
         for (let i = 0; i < count; i++) {
             const glyph = SPARKLE_GLYPHS[Math.floor(Math.random()*SPARKLE_GLYPHS.length)];
-            const left = (6 + Math.random()*88).toFixed(1);
+            const left = (Math.random() < 0.5 ? 3 + Math.random()*15 : 82 + Math.random()*15).toFixed(1);   // ริมซ้าย/ขวาเท่านั้น ไม่บังรูปกับชื่อ
             const top = (4 + Math.random()*82).toFixed(1);
             const size = (1.0 + Math.random()*1.1).toFixed(2);
             const delay = (Math.random()*1.4).toFixed(2);
