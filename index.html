@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tr. Oat's Lucky Draw Arcade</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800;900&family=Bebas+Neue&family=Orbitron:wght@800;900&family=Cinzel:wght@700;900&family=Chonburi&family=Audiowide&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -647,9 +647,338 @@
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 10px; }
+
+        /* ══════════════════════════════════════════════════════════════
+           🎨 สกิน (หน้าตาทั้งเว็บ) — คลาสสิก / นีออน / กาล่า / อวกาศ
+           ซ้อนทับ CSS เดิมด้วย body[data-skin] อย่างเดียว ไม่แตะโครงสร้างหรือโค้ดสุ่ม
+           ทุกอนิเมชันใช้แค่ transform/opacity (ลื่น ไม่กินเครื่อง) และหยุดหมดในโหมดประหยัด
+           ══════════════════════════════════════════════════════════════ */
+        .nm { white-space: nowrap; }   /* ชื่อ/นามสกุล ห้ามตัดกลางคำ */
+        .winner-badge { white-space: nowrap; }
+        .skin-bar { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+        .skin-btn {
+            font-family: 'Kanit', sans-serif; font-size: 0.82rem; font-weight: 700; padding: 5px 14px;
+            border-radius: 999px; cursor: pointer; transition: background .2s, border-color .2s, color .2s;
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.22); color: rgba(255,255,255,0.82);
+        }
+        .skin-btn:hover { background: rgba(255,255,255,0.15); }
+        .skin-btn.active { background: var(--warning); border-color: var(--warning); color: #160a12; }
+        .skin-fx { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; display: none; }
+        .skin-fx::before, .skin-fx::after { content: ''; position: absolute; will-change: transform, opacity; }
+
+        /* สกินพิเศษมีชุดสีของตัวเอง → ซ่อนจุดเลือกสี และของตกแต่งของธีมคลาสสิก */
+        body[data-skin] .theme-bar,
+        body[data-skin] .theme-decor,
+        body[data-skin] .spotlight { display: none; }
+        body[data-skin] .skin-fx { display: block; }
+        body[data-skin] select option { background: #fff; color: #15151f; }
+        body[data-skin] .winner-name { font-weight: 800; }
+
+        /* ────────────────────── ⚡ NEON ARENA ────────────────────── */
+        body[data-skin="neon"] {
+            --primary: #ff2bd6; --primary-dark: #a3127f; --secondary: #8a2bff; --secondary-dark: #5a1aa8;
+            --accent: #ffe14d; --accent-dark: #b89a10; --warning: #22e6ff; --warning-dark: #0f8fb3;
+            --purple: #8a2bff; --purple-dark: #5a1aa8;
+            background-color: #06060d !important;
+            background-image: radial-gradient(ellipse 60% 50% at 82% 8%, rgba(255,43,214,0.17), transparent 70%),
+                              radial-gradient(ellipse 55% 55% at 8% 96%, rgba(34,230,255,0.14), transparent 70%) !important;
+            background-size: 100% 100% !important;
+        }
+        body[data-skin="neon"] .skin-fx::before {      /* พื้นตารางเลื่อนช้าๆ เหมือนสนามแข่ง */
+            left: 0; right: 0; top: -44px; bottom: 0;
+            background-image: linear-gradient(rgba(34,230,255,0.07) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(34,230,255,0.07) 1px, transparent 1px);
+            background-size: 44px 44px; animation: neonGrid 5s linear infinite;
+        }
+        @keyframes neonGrid { to { transform: translateY(44px); } }
+        body[data-skin="neon"] .container {
+            background: linear-gradient(180deg, rgba(11,14,30,0.95), rgba(6,7,16,0.97)); border-radius: 6px;
+            box-shadow: 0 0 0 1.5px rgba(34,230,255,0.55), 0 0 44px rgba(34,230,255,0.13), 0 30px 80px rgba(0,0,0,0.7);
+        }
+        body[data-skin="neon"] .container::before,
+        body[data-skin="neon"] .container::after { width: 56px; height: 56px; background: none; opacity: 1; right: auto; }
+        body[data-skin="neon"] .container::before { top: -7px; left: -7px; border-left: 3px solid #ff2bd6; border-top: 3px solid #ff2bd6; }
+        body[data-skin="neon"] .container::after  { bottom: -7px; left: auto; right: -7px; border-right: 3px solid #ff2bd6; border-bottom: 3px solid #ff2bd6; }
+        body[data-skin="neon"] h1 {
+            font-family: 'Orbitron', 'Kanit', sans-serif; font-weight: 900; letter-spacing: 4px;
+            font-size: clamp(1.9rem, 4.6vw, 3.2rem); background: none; filter: none;
+            -webkit-text-fill-color: #f2fdff; color: #f2fdff;
+            text-shadow: 0 0 10px rgba(34,230,255,0.9), 0 0 26px rgba(34,230,255,0.5);
+        }
+        body[data-skin="neon"] h1 .h1-accent { -webkit-text-fill-color: #ff4fe0; text-shadow: 0 0 10px rgba(255,43,214,0.9), 0 0 26px rgba(255,43,214,0.5); }
+        body[data-skin="neon"] .term-badge { background: transparent; border: 1px solid rgba(34,230,255,0.6); color: #9eefff; border-radius: 2px; box-shadow: none; }
+        body[data-skin="neon"] .subtitle { color: #8fb3c9; }
+        body[data-skin="neon"] .stat-chip {
+            background: #0b0f1e; border: 1px solid rgba(34,230,255,0.55); border-radius: 0; color: #8fb3c9;
+            box-shadow: inset 0 0 18px rgba(34,230,255,0.08);
+        }
+        body[data-skin="neon"] .stat-chip.drawn  { border-color: #ff2bd6; }
+        body[data-skin="neon"] .stat-chip.remain { border-color: #ffe14d; }
+        body[data-skin="neon"] .stat-chip .num { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 1.6rem; color: #22e6ff; }
+        body[data-skin="neon"] .stat-chip.drawn .num  { color: #ff4fe0; }
+        body[data-skin="neon"] .stat-chip.remain .num { color: #ffe14d; }
+        body[data-skin="neon"] .progress-wrap { border-radius: 0; background: rgba(34,230,255,0.08); }
+        body[data-skin="neon"] .progress-fill { border-radius: 0; background: linear-gradient(90deg, #22e6ff, #ff2bd6); }
+        body[data-skin="neon"] .glass-panel,
+        body[data-skin="neon"] .attendance-panel,
+        body[data-skin="neon"] .history-panel {
+            background: #0a0d1a; border: 1px solid rgba(34,230,255,0.35); border-radius: 0;
+            box-shadow: inset 3px 0 0 rgba(34,230,255,0.55);
+        }
+        body[data-skin="neon"] .panel-head,
+        body[data-skin="neon"] .attend-head strong,
+        body[data-skin="neon"] .history-head strong { color: #22e6ff; }
+        body[data-skin="neon"] select,
+        body[data-skin="neon"] input[type="number"] { background: #111830; color: #eef6ff; border: 1.5px solid rgba(34,230,255,0.4); border-radius: 0; }
+        body[data-skin="neon"] .namelist-glow { border-radius: 0; padding: 2px; background: linear-gradient(140deg, #22e6ff, #8a2bff 50%, #ff2bd6); box-shadow: 0 0 18px rgba(34,230,255,0.18); }
+        body[data-skin="neon"] .namelist-glow textarea { border-radius: 0; background: #0d1224; color: #eef6ff; }
+        body[data-skin="neon"] .attend-chip:not(.absent) { background: rgba(34,230,255,0.08); border-color: rgba(34,230,255,0.45); border-radius: 2px; }
+        body[data-skin="neon"] .attend-chip.absent { border-radius: 2px; }
+        body[data-skin="neon"] .lock-btn,
+        body[data-skin="neon"] .refresh-btn,
+        body[data-skin="neon"] .history-export,
+        body[data-skin="neon"] .history-clear { border-radius: 2px; }
+        body[data-skin="neon"] .icon-toggle { background: #0f1426; border-radius: 2px; }
+        body[data-skin="neon"] button.btn-game { border-radius: 2px; text-shadow: none; }
+        body[data-skin="neon"] button.btn-game::after { display: none; }
+        body[data-skin="neon"] .btn-single {
+            background: linear-gradient(90deg, #22e6ff, #6af1ff 45%, #ff4fe0); color: #04121a;
+            box-shadow: 0 0 20px rgba(34,230,255,0.35);
+            clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+        }
+        body[data-skin="neon"] .btn-pair,
+        body[data-skin="neon"] .btn-group,
+        body[data-skin="neon"] .btn-team,
+        body[data-skin="neon"] .btn-reset { background: #0f1426; color: #eef6ff; box-shadow: none; border: 1px solid rgba(255,255,255,0.18); }
+        body[data-skin="neon"] .btn-pair  { border-color: #ff2bd6; }
+        body[data-skin="neon"] .btn-group { border-color: #8a2bff; }
+        body[data-skin="neon"] .btn-team  { border-color: #22e6ff; }
+        body[data-skin="neon"] .stage-bulbs { display: none; }
+        body[data-skin="neon"] .result-box {
+            border: 2px solid #22e6ff; border-radius: 0;
+            box-shadow: 0 0 30px rgba(34,230,255,0.22), inset 0 0 70px rgba(0,0,0,0.7);
+            background:
+                linear-gradient(#22e6ff, #22e6ff) left 24px top 22px / 46px 3px no-repeat,
+                linear-gradient(#22e6ff, #22e6ff) left 24px top 22px / 3px 46px no-repeat,
+                linear-gradient(#ff2bd6, #ff2bd6) right 24px top 22px / 46px 3px no-repeat,
+                linear-gradient(#ff2bd6, #ff2bd6) right 24px top 22px / 3px 46px no-repeat,
+                linear-gradient(#ff2bd6, #ff2bd6) left 24px bottom 22px / 46px 3px no-repeat,
+                linear-gradient(#ff2bd6, #ff2bd6) left 24px bottom 22px / 3px 46px no-repeat,
+                linear-gradient(#22e6ff, #22e6ff) right 24px bottom 22px / 46px 3px no-repeat,
+                linear-gradient(#22e6ff, #22e6ff) right 24px bottom 22px / 3px 46px no-repeat,
+                repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 4px),
+                radial-gradient(ellipse 60% 48% at 50% 46%, rgba(34,230,255,0.2), transparent 70%),
+                #070914;
+        }
+        body[data-skin="neon"] .result-box::before { display: none; }
+        body[data-skin="neon"] .stage-frame::before,
+        body[data-skin="neon"] .stage-frame::after { border-radius: 0; }
+        body[data-skin="neon"] .winner-name { color: #fff; text-shadow: 0 0 18px rgba(34,230,255,0.8), 0 3px 0 #0a3b55, 0 8px 22px rgba(0,0,0,0.8); }
+        body[data-skin="neon"] .winner-badge { font-family: 'Orbitron', 'Kanit', sans-serif; background: transparent; border: 1px solid #22e6ff; color: #22e6ff; border-radius: 0; letter-spacing: 4px; box-shadow: 0 0 14px rgba(34,230,255,0.3); }
+        body[data-skin="neon"] .stage-msg .big { font-family: 'Orbitron', 'Kanit', sans-serif; font-weight: 900; letter-spacing: 6px; }
+        body[data-skin="neon"] .btn-score { background: #ffe14d; color: #1c1600; text-shadow: none; box-shadow: 0 0 20px rgba(255,225,77,0.45); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+        body[data-skin="neon"] .group-item { background: rgba(34,230,255,0.06); border-left-color: #ff2bd6; border-radius: 0; }
+        body[data-skin="neon"] .history-chip { border-radius: 2px; background: rgba(34,230,255,0.08); }
+        body[data-skin="neon"] .fs-btn { border-radius: 4px; background: rgba(10,13,26,0.85); border-color: rgba(34,230,255,0.5); }
+        body[data-skin="neon"] .countdown-num { font-family: 'Orbitron', sans-serif; }
+
+        /* ────────────────────── 👑 ROYAL GALA ────────────────────── */
+        body[data-skin="gala"] {
+            --primary: #8b1538; --primary-dark: #5a0d24; --secondary: #f0d47a; --secondary-dark: #a8841f;
+            --accent: #e8c766; --accent-dark: #8a6d22; --warning: #d4af37; --warning-dark: #8a6d22;
+            --purple: #6b2440; --purple-dark: #3f1426;
+            background-color: #0c0a07 !important;
+            background-image: radial-gradient(ellipse 70% 55% at 60% 30%, rgba(212,175,55,0.15), transparent 70%),
+                              radial-gradient(ellipse 45% 45% at 5% 100%, rgba(139,21,56,0.32), transparent 70%),
+                              radial-gradient(rgba(212,175,55,0.10) 1.3px, transparent 1.5px) !important;   /* ลายจุดทอง (เบากว่าลายทแยงมาก) */
+            background-size: 100% 100%, 100% 100%, 24px 24px !important;
+        }
+        body[data-skin="gala"] .skin-fx::before {      /* ผงทองลอยขึ้นช้าๆ */
+            left: 0; right: 0; top: 0; bottom: -260px;
+            background-image: radial-gradient(1.6px 1.6px at 12% 20%, rgba(240,212,122,0.7), transparent),
+                              radial-gradient(1.2px 1.2px at 44% 62%, rgba(240,212,122,0.55), transparent),
+                              radial-gradient(2px 2px at 73% 35%, rgba(255,236,170,0.6), transparent),
+                              radial-gradient(1.2px 1.2px at 88% 82%, rgba(240,212,122,0.5), transparent),
+                              radial-gradient(1.6px 1.6px at 30% 90%, rgba(240,212,122,0.55), transparent);
+            background-size: 260px 260px; animation: galaDust 22s linear infinite;
+        }
+        @keyframes galaDust { to { transform: translateY(-260px); } }
+        body[data-skin="gala"] .container {
+            background: linear-gradient(180deg, #19130a, #0d0a06); border-radius: 4px;
+            box-shadow: 0 0 0 1.5px #d4af37, 0 0 0 7px #0c0a07, 0 0 0 8px #8a6d22, 0 0 70px rgba(212,175,55,0.12), 0 30px 80px rgba(0,0,0,0.75);
+        }
+        body[data-skin="gala"] h1 { font-family: 'Cinzel', 'Kanit', serif; font-weight: 900; letter-spacing: 6px; font-size: clamp(1.9rem, 5vw, 3.4rem); }
+        body[data-skin="gala"] .term-badge { background: #0c0a07; border: 1px solid #d4af37; color: #f0d47a; border-radius: 2px; }
+        body[data-skin="gala"] .subtitle { color: #b9a67a; }
+        body[data-skin="gala"] .stat-chip { background: #120e08; border: 1px solid #8a6d22; border-radius: 2px; color: #b9a67a; }
+        body[data-skin="gala"] .stat-chip .num,
+        body[data-skin="gala"] .stat-chip.drawn .num,
+        body[data-skin="gala"] .stat-chip.remain .num { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.7rem; color: #f0d47a; }
+        body[data-skin="gala"] .progress-wrap { border-radius: 0; }
+        body[data-skin="gala"] .progress-fill { border-radius: 0; background: linear-gradient(90deg, #a8841f, #f8e08e, #d4af37); }
+        body[data-skin="gala"] .glass-panel,
+        body[data-skin="gala"] .attendance-panel,
+        body[data-skin="gala"] .history-panel { background: linear-gradient(180deg, rgba(30,24,12,0.92), rgba(16,13,8,0.92)); border: 1px solid #8a6d22; border-radius: 2px; box-shadow: none; }
+        body[data-skin="gala"] .panel-head,
+        body[data-skin="gala"] .attend-head strong,
+        body[data-skin="gala"] .history-head strong { color: #e8c766; }
+        body[data-skin="gala"] select,
+        body[data-skin="gala"] input[type="number"] { background: #f4ead2; color: #2a1f08; border: 1px solid #8a6d22; border-radius: 2px; }
+        body[data-skin="gala"] .namelist-glow { border-radius: 2px; padding: 2px; background: linear-gradient(140deg, #f8e08e, #8a6d22 50%, #f8e08e); box-shadow: none; }
+        body[data-skin="gala"] .namelist-glow textarea { border-radius: 0; background: #f8f1df; color: #2a1f08; }
+        body[data-skin="gala"] .attend-chip:not(.absent) { background: transparent; border-color: #6e5719; color: #f4ead2; }
+        body[data-skin="gala"] .lock-btn,
+        body[data-skin="gala"] .refresh-btn { border-radius: 2px; }
+        body[data-skin="gala"] .icon-toggle { background: transparent; border-radius: 2px; border-color: #6e5719; }
+        body[data-skin="gala"] button.btn-game { border-radius: 2px; text-shadow: none; }
+        body[data-skin="gala"] .btn-single { background: linear-gradient(180deg, #f8e08e, #d4af37 55%, #a8841f); color: #241a04; box-shadow: 0 4px 0 #5a4512, inset 0 1px 0 rgba(255,255,255,0.6); letter-spacing: 1px; }
+        body[data-skin="gala"] .btn-pair,
+        body[data-skin="gala"] .btn-group,
+        body[data-skin="gala"] .btn-team,
+        body[data-skin="gala"] .btn-reset { background: #17120a; color: #f4ead2; border: 1px solid #6e5719; box-shadow: 0 4px 0 #000; }
+        body[data-skin="gala"] .btn-pair { color: #f3b6c4; border-color: #8b1538; }
+        body[data-skin="gala"] .stage-bulbs i { background: #fff3c4; box-shadow: 0 0 10px #d4af37; }
+        body[data-skin="gala"] .result-box {
+            border: 2px solid #d4af37; border-radius: 2px;
+            /* เส้นทองชั้นนอกวาดด้วยเงาแทน outline — outline ทำให้ต้องวาดเวทีใหม่ทุกเฟรมตอนประกาศผล (ช้าลง ~20%) */
+            box-shadow: 0 0 0 5px #0e0b06, 0 0 0 6px #8a6d22, 0 0 34px rgba(212,175,55,0.2), inset 0 0 70px rgba(0,0,0,0.7);
+            background:
+                linear-gradient(#d4af37, #d4af37) left 14px top 14px / 64px 1.5px no-repeat,
+                linear-gradient(#d4af37, #d4af37) left 14px top 14px / 1.5px 64px no-repeat,
+                linear-gradient(#8a6d22, #8a6d22) left 24px top 24px / 38px 1px no-repeat,
+                linear-gradient(#8a6d22, #8a6d22) left 24px top 24px / 1px 38px no-repeat,
+                linear-gradient(#d4af37, #d4af37) right 14px top 14px / 64px 1.5px no-repeat,
+                linear-gradient(#d4af37, #d4af37) right 14px top 14px / 1.5px 64px no-repeat,
+                linear-gradient(#8a6d22, #8a6d22) right 24px top 24px / 38px 1px no-repeat,
+                linear-gradient(#8a6d22, #8a6d22) right 24px top 24px / 1px 38px no-repeat,
+                linear-gradient(#d4af37, #d4af37) left 14px bottom 14px / 64px 1.5px no-repeat,
+                linear-gradient(#d4af37, #d4af37) left 14px bottom 14px / 1.5px 64px no-repeat,
+                linear-gradient(#d4af37, #d4af37) right 14px bottom 14px / 64px 1.5px no-repeat,
+                linear-gradient(#d4af37, #d4af37) right 14px bottom 14px / 1.5px 64px no-repeat,
+                radial-gradient(ellipse 52% 50% at 50% 46%, rgba(240,212,122,0.2), transparent 70%),
+                #0e0b06;
+        }
+        /* รังสีทองหลังเวที แยกเป็นเลเยอร์ของตัวเอง → วาดครั้งเดียว ไม่ต้องวาดใหม่ทุกเฟรมตอนรูป/ประกายขยับ */
+        body[data-skin="gala"] .result-box::after {
+            content: ''; position: absolute; inset: 0; z-index: -2; pointer-events: none;
+            background: repeating-conic-gradient(from 0deg at 50% 46%, rgba(240,212,122,0.065) 0deg 5deg, transparent 5deg 15deg);
+            will-change: transform;
+        }
+        body[data-skin="gala"] .result-box::before { background: linear-gradient(180deg, rgba(255,236,170,0.12) 0%, transparent 65%); }
+        body[data-skin="gala"] .stage-frame::before,
+        body[data-skin="gala"] .stage-frame::after { border-radius: 4px; }
+        body[data-skin="gala"] .winner-name {
+            font-family: 'Chonburi', 'Kanit', serif; font-weight: 400; font-size: 4.4rem; line-height: 1.3;
+            color: #fff8e6; text-shadow: 0 2px 0 #5a4512, 0 6px 20px rgba(0,0,0,0.85), 0 0 28px rgba(240,212,122,0.45);
+        }
+        body[data-skin="gala"] .winner-badge { font-family: 'Cinzel', 'Kanit', serif; font-weight: 700; background: #0c0a07; border: 1px solid #d4af37; color: #f0d47a; border-radius: 2px; letter-spacing: 4px; }
+        body[data-skin="gala"] .stage-msg .big { font-family: 'Cinzel', 'Kanit', serif; font-weight: 900; letter-spacing: 6px; }
+        body[data-skin="gala"] .btn-score { background: linear-gradient(180deg, #f8e08e, #d4af37); color: #241a04; text-shadow: none; box-shadow: 0 5px 0 #5a4512; border-radius: 2px; }
+        body[data-skin="gala"] .group-item { background: rgba(212,175,55,0.06); border-left-color: #d4af37; border-radius: 2px; }
+        body[data-skin="gala"] .history-chip { border-radius: 2px; background: rgba(212,175,55,0.08); }
+        body[data-skin="gala"] .fs-btn { border-radius: 4px; background: rgba(12,10,7,0.85); border-color: #8a6d22; }
+        body[data-skin="gala"] .countdown-num { font-family: 'Cinzel', serif; }
+
+        /* ────────────────────── 🪐 COSMIC FESTIVAL ────────────────────── */
+        body[data-skin="cosmic"] {
+            --primary: #ff7ac6; --primary-dark: #b8448a; --secondary: #8b5cf6; --secondary-dark: #5b35b8;
+            --accent: #ffe58a; --accent-dark: #c8a64a; --warning: #3ef2c8; --warning-dark: #1aa486;
+            --purple: #8b5cf6; --purple-dark: #5b35b8;
+            background-color: #050722 !important;
+            background-image: radial-gradient(ellipse 80% 40% at 28% -6%, rgba(62,242,200,0.26), transparent 70%),
+                              radial-gradient(ellipse 60% 45% at 96% 8%, rgba(139,92,246,0.38), transparent 70%),
+                              radial-gradient(ellipse 70% 55% at 70% 108%, rgba(255,122,198,0.22), transparent 70%) !important;
+            background-size: 100% 100% !important;
+        }
+        body[data-skin="cosmic"] .skin-fx::before,
+        body[data-skin="cosmic"] .skin-fx::after { inset: 0; }
+        body[data-skin="cosmic"] .skin-fx::before {      /* ดาวดวงเล็ก กะพริบ */
+            background-image: radial-gradient(1px 1px at 8% 14%, #fff, transparent), radial-gradient(1px 1px at 22% 62%, #cfe3ff, transparent),
+                              radial-gradient(1.3px 1.3px at 37% 9%, #fff, transparent), radial-gradient(1px 1px at 47% 84%, #fff, transparent),
+                              radial-gradient(1px 1px at 63% 41%, #fff, transparent), radial-gradient(1px 1px at 79% 73%, #cfe3ff, transparent),
+                              radial-gradient(1.3px 1.3px at 91% 22%, #fff, transparent);
+            background-size: 340px 340px; animation: starTwinkle 3.2s ease-in-out infinite alternate;
+        }
+        body[data-skin="cosmic"] .skin-fx::after {       /* ดาวดวงใหญ่ กะพริบสลับจังหวะ */
+            background-image: radial-gradient(2px 2px at 17% 33%, #fff, transparent), radial-gradient(2px 2px at 58% 18%, #ffe9a8, transparent),
+                              radial-gradient(2.2px 2.2px at 83% 58%, #fff, transparent), radial-gradient(1.8px 1.8px at 34% 79%, #cfe3ff, transparent);
+            background-size: 520px 520px; animation: starTwinkle 4.6s ease-in-out 1.3s infinite alternate;
+        }
+        @keyframes starTwinkle { from { opacity: 0.35; } to { opacity: 1; } }
+        body[data-skin="cosmic"] .container {
+            background: linear-gradient(180deg, rgba(17,20,62,0.92), rgba(8,10,40,0.95)); border-radius: 30px;
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.14), 0 0 70px rgba(139,92,246,0.25), 0 30px 80px rgba(0,0,0,0.6);
+        }
+        body[data-skin="cosmic"] h1 {
+            font-family: 'Audiowide', 'Kanit', sans-serif; letter-spacing: 3px; font-size: clamp(1.9rem, 4.8vw, 3.3rem);
+            background: none; filter: none; -webkit-text-fill-color: #ffffff; color: #fff;
+            text-shadow: 0 0 22px rgba(139,92,246,0.7);
+        }
+        body[data-skin="cosmic"] h1 .h1-accent { -webkit-text-fill-color: #3ef2c8; text-shadow: 0 0 20px rgba(62,242,200,0.6); }
+        body[data-skin="cosmic"] .term-badge { background: rgba(139,92,246,0.22); border: 1px solid rgba(167,139,250,0.6); color: #e6deff; }
+        body[data-skin="cosmic"] .subtitle { color: #a7add6; }
+        body[data-skin="cosmic"] .stat-chip { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 18px; color: #a7add6; box-shadow: none; }
+        body[data-skin="cosmic"] .stat-chip.drawn  { border-color: rgba(62,242,200,0.45); background: rgba(62,242,200,0.08); }
+        body[data-skin="cosmic"] .stat-chip.remain { border-color: rgba(255,122,198,0.45); background: rgba(255,122,198,0.08); }
+        body[data-skin="cosmic"] .stat-chip .num { font-family: 'Audiowide', sans-serif; font-size: 1.6rem; color: #fff; }
+        body[data-skin="cosmic"] .stat-chip.drawn .num  { color: #3ef2c8; }
+        body[data-skin="cosmic"] .stat-chip.remain .num { color: #ff9fd6; }
+        body[data-skin="cosmic"] .progress-fill { background: linear-gradient(90deg, #3ef2c8, #8b5cf6, #ff7ac6); }
+        body[data-skin="cosmic"] .glass-panel,
+        body[data-skin="cosmic"] .attendance-panel,
+        body[data-skin="cosmic"] .history-panel { background: rgba(20,24,64,0.78); border: 1px solid rgba(255,255,255,0.12); border-radius: 22px; box-shadow: none; }
+        body[data-skin="cosmic"] .panel-head,
+        body[data-skin="cosmic"] .attend-head strong,
+        body[data-skin="cosmic"] .history-head strong { color: #3ef2c8; }
+        body[data-skin="cosmic"] select,
+        body[data-skin="cosmic"] input[type="number"] { background: rgba(255,255,255,0.93); color: #15173a; border-radius: 14px; }
+        body[data-skin="cosmic"] .namelist-glow { border-radius: 18px; padding: 3px; background: linear-gradient(140deg, #3ef2c8, #8b5cf6 50%, #ff7ac6); box-shadow: 0 0 22px rgba(139,92,246,0.3); }
+        body[data-skin="cosmic"] .namelist-glow textarea { border-radius: 15px; }
+        body[data-skin="cosmic"] .attend-chip:not(.absent) { background: rgba(139,92,246,0.22); border-color: rgba(139,92,246,0.55); }
+        body[data-skin="cosmic"] .icon-toggle { background: rgba(255,255,255,0.06); border-radius: 14px; }
+        body[data-skin="cosmic"] button.btn-game { border-radius: 16px; text-shadow: none; }
+        body[data-skin="cosmic"] button.btn-game::after { border-radius: 15px 15px 8px 8px; }
+        body[data-skin="cosmic"] .btn-single { background: linear-gradient(90deg, #3ef2c8, #a78bfa 55%, #ff7ac6); color: #0b0d2a; box-shadow: 0 6px 22px rgba(139,92,246,0.4); }
+        body[data-skin="cosmic"] .btn-pair,
+        body[data-skin="cosmic"] .btn-group,
+        body[data-skin="cosmic"] .btn-team,
+        body[data-skin="cosmic"] .btn-reset { background: rgba(255,255,255,0.07); color: #eef0ff; border: 1px solid rgba(255,255,255,0.16); box-shadow: none; }
+        body[data-skin="cosmic"] .btn-pair  { border-color: rgba(255,122,198,0.55); }
+        body[data-skin="cosmic"] .btn-group { border-color: rgba(167,139,250,0.6); }
+        body[data-skin="cosmic"] .btn-team  { border-color: rgba(62,242,200,0.55); }
+        body[data-skin="cosmic"] .stage-bulbs i { width: 6px; height: 6px; background: #fff; box-shadow: 0 0 8px #a78bfa; }
+        body[data-skin="cosmic"] .result-box {
+            border: 1px solid rgba(255,255,255,0.18); border-radius: 30px;
+            box-shadow: 0 0 40px rgba(139,92,246,0.28), inset 0 0 70px rgba(0,0,0,0.55);
+            background:
+                radial-gradient(circle 120px at calc(100% - 6px) 6px, #ffb3de 0%, #a173ff 45%, #3a238f 92%, transparent 93%) no-repeat,
+                radial-gradient(circle 22px at 48px calc(100% - 52px), #fff2c2 0%, #c8a64a 94%, transparent 96%) no-repeat,
+                radial-gradient(ellipse 46% 40% at 50% 44%, rgba(139,92,246,0.42), transparent 70%),
+                radial-gradient(ellipse 80% 30% at 50% 102%, rgba(62,242,200,0.2), transparent 70%),
+                #080b2e;
+        }
+        body[data-skin="cosmic"] .result-box::before {      /* วงแหวนดาวเคราะห์มุมขวาบน */
+            top: 18px; left: auto; right: -96px; width: 300px; height: 56px; clip-path: none;
+            border-radius: 50%; border: 3px solid rgba(62,242,200,0.55); background: none;
+            transform: rotate(-24deg);
+        }
+        body[data-skin="cosmic"] .stage-frame::before,
+        body[data-skin="cosmic"] .stage-frame::after { border-radius: 34px; }
+        body[data-skin="cosmic"] .winner-name { color: #fff; text-shadow: 0 0 22px rgba(167,139,250,0.9), 0 3px 0 #2a1a6e, 0 8px 22px rgba(0,0,0,0.8); }
+        body[data-skin="cosmic"] .winner-badge { font-family: 'Audiowide', 'Kanit', sans-serif; font-weight: 400; background: rgba(62,242,200,0.12); border: 1px solid #3ef2c8; color: #3ef2c8; letter-spacing: 3px; }
+        body[data-skin="cosmic"] .avatar { border-color: #fff; box-shadow: 0 0 0 8px rgba(139,92,246,0.35), 0 0 40px rgba(139,92,246,0.7); }
+        body[data-skin="cosmic"] .stage-msg .big { font-family: 'Audiowide', 'Kanit', sans-serif; letter-spacing: 5px; }
+        body[data-skin="cosmic"] .btn-score { background: #ffe58a; color: #2a1f00; text-shadow: none; box-shadow: 0 6px 0 #c8a64a; border-radius: 999px; }
+        body[data-skin="cosmic"] .group-item { background: rgba(139,92,246,0.12); border-left-color: #3ef2c8; border-radius: 14px; }
+        body[data-skin="cosmic"] .fs-btn { border-radius: 16px; background: rgba(20,24,64,0.8); border-color: rgba(255,255,255,0.25); }
+        body[data-skin="cosmic"] .countdown-num { font-family: 'Audiowide', sans-serif; }
+
+        /* โหมดประหยัด / ผู้ใช้ตั้งลดการเคลื่อนไหว: หยุดฉากหลังของทุกสกิน */
+        body.lite .skin-fx::before, body.lite .skin-fx::after { animation: none !important; }
+        @media (prefers-reduced-motion: reduce) { .skin-fx::before, .skin-fx::after { animation: none !important; } }
     </style>
 </head>
-<body onload="initLite(); applyTheme('showtime'); renderStageBulbs(); loadAppData(); startCurtain()">
+<body onload="initLite(); initSkin(); applyTheme('showtime'); renderStageBulbs(); loadAppData(); startCurtain()">
 
 <script>document.body.classList.add('pre-reveal');</script>
 
@@ -666,6 +995,7 @@
 
 <div class="spotlight"></div>
 <div class="theme-decor" id="themeDecor"></div>
+<div class="skin-fx" aria-hidden="true"></div>
 
 
 <div class="top-controls">
@@ -680,6 +1010,14 @@
         <h1>LUCKY DRAW <span class="h1-accent">ARCADE</span></h1>
         <div class="title-rule"><i></i><b></b><i></i></div>
         <p class="subtitle">ระบบสุ่มรายชื่อนักเรียน · by Tr. Oat</p>
+    </div>
+
+    <div class="skin-bar" role="group" aria-label="เลือกหน้าตาเว็บ">
+        <span class="theme-label">✨ สกิน:</span>
+        <button type="button" class="skin-btn active" data-skin="classic" onclick="setSkin('classic')">🎪 คลาสสิก</button>
+        <button type="button" class="skin-btn" data-skin="neon"    onclick="setSkin('neon')">⚡ นีออน</button>
+        <button type="button" class="skin-btn" data-skin="gala"    onclick="setSkin('gala')">👑 กาล่า</button>
+        <button type="button" class="skin-btn" data-skin="cosmic"  onclick="setSkin('cosmic')">🪐 อวกาศ</button>
     </div>
 
     <div class="theme-bar">
@@ -1308,6 +1646,22 @@
         decor.innerHTML = html;
     }
 
+    // ── สกิน: เปลี่ยนหน้าตาทั้งเว็บ (สี ฟอนต์ กรอบ เวที ฉากหลัง) — จำค่าที่เลือกไว้ในเครื่อง ──
+    const SKINS = ['classic', 'neon', 'gala', 'cosmic'];
+    function setSkin(name, silent) {
+        if (SKINS.indexOf(name) === -1) name = 'classic';
+        if (name === 'classic') delete document.body.dataset.skin;
+        else document.body.dataset.skin = name;
+        document.querySelectorAll('.skin-btn').forEach(b => b.classList.toggle('active', b.dataset.skin === name));
+        try { localStorage.setItem('ldaSkin', name); } catch (e) { /* โหมดส่วนตัว: แค่ไม่จำ */ }
+        if (!silent) { ensureAudio(); beep(660, 0.07, 'sine', 0.07); }
+    }
+    function initSkin() {
+        let saved = null;
+        try { saved = localStorage.getItem('ldaSkin'); } catch (e) {}
+        setSkin(saved || 'classic', true);
+    }
+
     function applyTheme(name) {
         const t = themes[name]; if (!t) return;
         const b = t.blobs;
@@ -1364,7 +1718,7 @@
             return;
         }
         list.innerHTML = drawHistory.map((n, i) =>
-            `<span class="history-chip"><span class="seq">${i+1}.</span> ${escHtml(n)}</span>`
+            `<span class="history-chip"><span class="seq">${i+1}.</span> ${nameNoBreak(n)}</span>`
         ).join('');
         list.scrollTop = list.scrollHeight;
     }
@@ -1583,6 +1937,36 @@
         }
     }
 
+    // ── ชื่อคนไทยห้ามถูกตัดกลางคำ ──
+    // เบราว์เซอร์ตัดบรรทัดภาษาไทยตามพจนานุกรม ไม่รู้ว่าเป็นชื่อคน เลยเคยตัด "ทินคาม" เป็น "ทิน / คาม"
+    // nameParts: ให้ตัดบรรทัดได้เฉพาะช่องว่างระหว่างชื่อกับนามสกุล (ใช้กับชื่อตัวใหญ่บนเวที)
+    // nameNoBreak: ทั้งชื่อเป็นก้อนเดียว (ใช้ในรายการคู่/กลุ่ม/ทีม/ประวัติ ที่คั่นหลายชื่อด้วยจุลภาค)
+    function nameParts(n) {
+        return escHtml(n).split(/(\s+)/).map(t => /^\s*$/.test(t) ? t : '<span class="nm">' + t + '</span>').join('');
+    }
+    function nameNoBreak(n) { return '<span class="nm">' + escHtml(n) + '</span>'; }
+    // ย่อขนาดตัวอักษรชื่อผู้ชนะจนท่อนที่ยาวที่สุดพอดีเวที (ชื่อยาวๆ จะได้ไม่ล้นหรือแตกบรรทัดมั่ว)
+    function fitWinnerName(el) {
+        if (!el || !el.isConnected) return;
+        const box = el.closest('.result-box');
+        const avail = box ? box.clientWidth - 64 : 0;
+        if (avail <= 0) return;
+        el.style.fontSize = '';
+        let size = parseFloat(getComputedStyle(el).fontSize) || 0;
+        const parts = el.querySelectorAll('.nm');
+        for (let i = 0; i < 16 && size > 20; i++) {
+            let widest = 0;
+            parts.forEach(sp => { widest = Math.max(widest, sp.offsetWidth); });   // offsetWidth = ขนาดจริง ไม่โดนแอนิเมชันเด้ง (scale) หลอก
+            if (widest <= avail) break;
+            size = Math.floor(size * 0.9);
+            el.style.fontSize = size + 'px';
+        }
+    }
+    function fitWinnerNameSoon(el) {
+        fitWinnerName(el);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitWinnerName(el));   // ฟอนต์โหลดเสร็จทีหลัง วัดใหม่
+    }
+
     function escHtml(s) {
         return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
@@ -1621,7 +2005,7 @@
             const t = names[Math.floor(Math.random()*names.length)];
             tickSound();
             if (av) av.src = 'https://api.dicebear.com/7.x/micah/svg?seed=' + encodeURIComponent(t) + '&backgroundColor=b6e3f4';
-            if (nm) nm.textContent = t;
+            if (nm) nm.innerHTML = nameParts(t);
         }, 70);
         setTimeout(() => {
             clearInterval(interval);
@@ -1663,7 +2047,7 @@
         const display = document.getElementById('resultDisplay');
         display.innerHTML = `<div class="flip-stage">
                                 <div class="flip-card" id="flipCard">
-                                    <div class="flip-card-face" id="flipFace">${escHtml(names[Math.floor(Math.random()*names.length)])}</div>
+                                    <div class="flip-card-face" id="flipFace">${nameParts(names[Math.floor(Math.random()*names.length)])}</div>
                                 </div>
                               </div>`;
         let flips = 0;
@@ -1675,7 +2059,7 @@
             const card = document.getElementById('flipCard');
             const face = document.getElementById('flipFace');
             if (card) { card.classList.remove('flip-anim'); void card.offsetWidth; card.classList.add('flip-anim'); }
-            if (face) face.textContent = flips >= maxFlips ? target : names[Math.floor(Math.random()*names.length)];
+            if (face) face.innerHTML = nameParts(flips >= maxFlips ? target : names[Math.floor(Math.random()*names.length)]);
             if (flips >= maxFlips) {
                 clearInterval(interval);
                 setTimeout(() => { if (myToken === drawToken) onDone(); }, 450);
@@ -1745,8 +2129,9 @@
         display.innerHTML = `<div class="winner-card">
                                 <span class="winner-badge">🏆 WINNER?</span>
                                 <div class="avatar-halo"><img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(decoy)}&backgroundColor=b6e3f4"></div>
-                                <div class="winner-name">${escHtml(decoy)}</div>
+                                <div class="winner-name">${nameParts(decoy)}</div>
                               </div>`;
+        fitWinnerNameSoon(display.querySelector('.winner-name'));
         beep(880, 0.15, 'triangle', 0.1);
 
         setTimeout(() => {
@@ -1831,7 +2216,7 @@
                         <div class="team-card-emoji">${m.emoji}</div>
                         <div class="team-card-name">${escHtml(m.name)}</div>
                         <div class="team-card-count">${members.length} คน</div>
-                        <div class="team-card-members">${members.map(escHtml).join(', ')}</div>
+                        <div class="team-card-members">${members.map(nameNoBreak).join(', ')}</div>
                      </div>`;
         });
         html += `</div></div>`;
@@ -1856,7 +2241,7 @@
                             <span class="shockwave" style="animation-delay:0.16s;"></span>
                             <img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(winner)}&backgroundColor=b6e3f4">
                         </div>
-                        <div class="winner-name">${escHtml(winner)}</div>`;
+                        <div class="winner-name">${nameParts(winner)}</div>`;
 
         if (document.getElementById('challengeMode').checked) {
             const room = document.getElementById('savedRooms').value;
@@ -1865,9 +2250,10 @@
             if (tasks && tasks.length > 0) task = tasks[Math.floor(Math.random()*tasks.length)];
             html += `<div class="challenge-box">🔥 ภารกิจ: ${escHtml(task)}</div>`;
         }
-        html += `<button class="btn-game btn-score" id="scoreBtn">⭐ +1 คะแนนให้ ${escHtml(winner)}</button>
+        html += `<button class="btn-game btn-score" id="scoreBtn">⭐ +1 คะแนนให้ ${nameParts(winner)}</button>
                  </div>`;
         display.innerHTML = html;
+        fitWinnerNameSoon(display.querySelector('.winner-card .winner-name'));
 
         // ผูก event ด้วย JS แทนการฝังชื่อลงใน onclick (กันชื่อที่มี ' หรือ " ทำปุ่มพัง)
         const scoreBtn = document.getElementById('scoreBtn');
@@ -1954,7 +2340,7 @@
             const t = names[Math.floor(Math.random()*names.length)];
             tickSound();
             display.innerHTML = `<img class="avatar" src="https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(t)}&backgroundColor=b6e3f4">
-                                 <div class="winner-name" style="font-size:3rem;">${escHtml(t)}</div>`;
+                                 <div class="winner-name" style="font-size:3rem;">${nameParts(t)}</div>`;
         }, 70);
         setTimeout(() => {
             clearInterval(interval);
@@ -1974,7 +2360,7 @@
         if (mode === 'pair') {
             let html = fx + '<div class="result-list"><strong style="color:#ffd32a;font-size:1.5rem;">👥 จับคู่ลุยงาน:</strong><br>';
             for (let i=0;i<shuffled.length;i+=2){
-                const p1=escHtml(shuffled[i]), p2=shuffled[i+1]?escHtml(shuffled[i+1]):'<span style="color:var(--primary);">(ไม่มีคู่/เหงาๆ)</span>';
+                const p1=nameNoBreak(shuffled[i]), p2=shuffled[i+1]?nameNoBreak(shuffled[i+1]):'<span style="color:var(--primary);">(ไม่มีคู่/เหงาๆ)</span>';
                 html += `<div class="group-item">${p1} <span style="font-size:1.5rem;">🤝</span> ${p2}</div>`;
             }
             html += '</div>'; display.innerHTML = html;
@@ -1984,7 +2370,7 @@
             let html = fx + `<div class="result-list"><strong style="color:#ffd32a;font-size:1.5rem;">📦 จัดกลุ่ม (กลุ่มละ ${size} คน):</strong><br>`;
             let g=1;
             for (let i=0;i<shuffled.length;i+=size){
-                html += `<div class="group-item"><strong style="color:var(--accent);">ทีมที่ ${g}:</strong> ${shuffled.slice(i,i+size).map(escHtml).join(', ')}</div>`; g++;
+                html += `<div class="group-item"><strong style="color:var(--accent);">ทีมที่ ${g}:</strong> ${shuffled.slice(i,i+size).map(nameNoBreak).join(', ')}</div>`; g++;
             }
             html += '</div>'; display.innerHTML = html;
         }
@@ -1999,7 +2385,7 @@
             const url = GAS_API_URL + "?action=recordScore&room=" + encodeURIComponent(room) + "&name=" + encodeURIComponent(studentName);
             const res = await fetch(url);
             const result = await res.json();
-            btn.innerHTML = result.message;
+            btn.textContent = (result && result.message) ? String(result.message) : '✅ บันทึกคะแนนแล้ว';   // textContent: ข้อความจากชีตห้ามถูกตีความเป็น HTML
             btn.style.backgroundColor = '#2ed573'; btn.style.boxShadow = '0 6px 0 #27ae60';
             fireConfetti({ particleCount: 50, spread: 40, origin: { y: 0.8 } });
         } catch (e) {
